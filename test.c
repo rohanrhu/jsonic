@@ -15,12 +15,12 @@
 #include "jsonic.h"
 
 int main() {
-	char* json_string = jsonic_from_file("test.json");
+    char* json_string = jsonic_from_file("test.json");
     
     struct timeval t0, t1;
-	gettimeofday(&t0, NULL);
-	
-	jsonic_node_t* members = jsonic_get(json_string, NULL, "members", 0);
+    gettimeofday(&t0, NULL);
+    
+    jsonic_node_t* members = jsonic_get(json_string, NULL, "members", 0);
     jsonic_node_t* member = jsonic_get(json_string, members, NULL, 1);
     jsonic_node_t* powers = jsonic_get(json_string, member, "powers", 0);
     
@@ -34,15 +34,15 @@ int main() {
     
     jsonic_node_t* power; 
     for (int i=0;; i++) {
-    	power = jsonic_get(json_string, powers, NULL, i);
-    	if (!power) break;
-		
+        power = jsonic_get(json_string, powers, NULL, i);
+        if (!power) break;
+        
         if (power->type == JSONIC_NODE_TYPE_STRING) {
             printf("\t%s\n", power->val);
         }
-		
-		jsonic_free(power);
-	}
+        
+        jsonic_free(power);
+    }
 
     jsonic_free(members);
     jsonic_free(member);
@@ -51,6 +51,6 @@ int main() {
     
     gettimeofday(&t1, NULL);
     printf("\n%ldus elapsed.\n", (t1.tv_sec * 1000000 + t1.tv_usec) - (t0.tv_sec * 1000000 + t0.tv_usec));
-	
+    
     return 0;
 }
