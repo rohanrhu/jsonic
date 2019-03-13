@@ -74,6 +74,7 @@ extern jsonic_node_t* jsonic_get(
     node->ksync = 0;
     node->kind = 0;
     node->arrind = 0;
+    node->meta = 0;
     
     int keylen = 0;
     
