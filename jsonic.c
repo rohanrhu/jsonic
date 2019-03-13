@@ -112,6 +112,22 @@ extern jsonic_node_t* jsonic_get(
         goto next;
     }
 
+    if (
+        (node->meta == 0)
+        &&
+        (c == '\\')
+        &&
+        (
+            (node->parser_state == JSONIC_PARSER_STATE_EXPECT_VAL_END)
+            ||
+            (node->parser_state == JSONIC_PARSER_STATE_EXPECT_ARR_STR_END)
+        )
+    ) {
+        node->meta = 1;
+        node->ind++;
+        goto next;
+    }
+
     if (node->parser_state == JSONIC_PARSER_STATE_EXPECT_ANY) {
         if (c == '{') {
             node->clevel = (node->plevel++ == 0) ? 1: node->clevel;
@@ -188,7 +204,7 @@ extern jsonic_node_t* jsonic_get(
             }
         }
     } else if (node->parser_state == JSONIC_PARSER_STATE_EXPECT_VAL_END) {
-        if (c == '"') {
+        if ((c == '"') && (node->meta == 0)) {
             node->parser_state = JSONIC_PARSER_STATE_EXPECT_KEY_START;
             node->ind++;
             
@@ -399,7 +415,7 @@ extern jsonic_node_t* jsonic_get(
             }
         }
     } else if (node->parser_state == JSONIC_PARSER_STATE_EXPECT_ARR_STR_END) {
-        if (c == '"') {
+        if ((c == '"') && (node->meta == 0)) {
             node->parser_state = JSONIC_PARSER_STATE_EXPECT_ARR_END;
             
             if (node->arrind == index) {
@@ -454,6 +470,7 @@ extern jsonic_node_t* jsonic_get(
         }
     }
 
+    node->meta = 0;
     node->ind++;
 
     goto next;

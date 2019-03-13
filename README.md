@@ -37,6 +37,9 @@ You will use structure members: `type`, `val`, `len` for reading JSON.
 
 `val` is useable for only string and boolean types. `val` is a NULL Terminated String and you can get length of string via `len` for string values.
 
+#### Integer Values
+Integer values come as NULL Terminated String in `val`.
+
 #### Boolean Values
 Boolean values come as NULL Terminated String in `val`. `val` maybe `"1"` or `"0"` for boolean values.
 

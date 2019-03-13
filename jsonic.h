@@ -43,6 +43,7 @@ struct jsonic_node {
     int ntype;
     int parser_state;
     int ksync;
+    int meta;
 };
 
 extern char* jsonic_from_file(char* fname);
