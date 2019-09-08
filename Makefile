@@ -1,13 +1,21 @@
 CC = gcc
 CFLAGS = -std=c99 -I. -g
+SOURCES = $(filter-out $(shell find . -path "*/examples/*"), $(shell find . -name "*.c"))
+HEADERS = $(filter-out $(shell find . -path "*/examples/*"), $(shell find . -name "*.h"))
+EXECUTABLES = $(shell find . -name "*.exe")
+OBJ = $(SOURCES:.c=.o)
+
 ifeq ($(OS), Windows_NT)
-	RM = del
+	RM = rm -rf
 else
-	RM = rm
+	RM = rm -rf
 endif
 
-build:
-	$(CC) -o test.exe test.c jsonic.c $(CFLAGS)
+all: $(OBJ)
+
+$(OBJ): %:
+	$(CC) -c -o $@ $(SOURCE) $(basename $@).c $(CFLAGS)
 
 clean:
-	$(RM) test.exe
+	$(RM) $(OBJ)
+	$(RM) $(EXECUTABLES)
