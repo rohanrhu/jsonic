@@ -396,6 +396,10 @@ extern jsonic_node_t* jsonic_get(
         }
     } else if (node->parser_state == JSONIC_PARSER_STATE_EXPECT_KEY_END) {
         if (c == '"') {
+            if (keylen != node->kind) {
+                node->ksync = 0;
+            }
+
             node->kind = 0;
             node->parser_state = JSONIC_PARSER_STATE_EXPECT_VAL_START;
 
@@ -411,6 +415,8 @@ extern jsonic_node_t* jsonic_get(
         
         if (
             (keylen == 0)
+            ||
+            (keylen <= node->kind)
             ||
             (c != key[node->kind])
         ) {
