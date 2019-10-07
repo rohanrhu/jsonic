@@ -84,6 +84,8 @@ extern int jsonic_from_node(jsonic_node_t* node) {
     } else if (node->type == JSONIC_NODE_TYPE_NULL) {
         return node->ind;
     }
+
+    return 0;
 }
 
 extern int jsonic_from_node_free(jsonic_node_t* node) {
@@ -635,7 +637,7 @@ extern jsonic_node_t* jsonic_get(
     } else if (node->parser_state == JSONIC_PARSER_STATE_EXPECT_ARR_NUMVAL) {
         if (node->arrind == index) {
             if (!((c > 47) && (c < 58)) && (c != '.')) {
-                node->parser_state == JSONIC_PARSER_STATE_EXPECT_ARR_END;
+                node->parser_state = JSONIC_PARSER_STATE_EXPECT_ARR_END;
                 return node;
             }
 
