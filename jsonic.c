@@ -342,10 +342,6 @@ extern jsonic_node_t* jsonic_get(
         }
     } else if (node->parser_state == JSONIC_PARSER_STATE_EXPECT_NUMVAL) {
         if (node->ksync) {
-            if (json_str[node->ind+1] == '\0') {
-                return node;
-            }
-
             if (!((c > 47) && (c < 58)) && (c != '.')) {
                 node->parser_state = JSONIC_PARSER_STATE_EXPECT_KEY_START;
                 return node;
@@ -357,12 +353,6 @@ extern jsonic_node_t* jsonic_get(
             strcpy(node->val, v);
             node->val[len] = c;
             node->val[len+1] = '\0';
-
-            if (json_str[node->ind+2] == '\0') {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_KEY_START;
-                node->ind++;
-                return node;
-            }
         } else {
             if (((c > 47) && (c < 58)) || (c == '.')) {
             } else if (c =='}') {
