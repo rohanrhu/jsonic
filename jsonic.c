@@ -58,7 +58,7 @@ extern int jsonic_array_length(char* json_str, jsonic_node_t* array) {
     jsonic_node_t* node = NULL;
 
     for (length=0;;) {
-        node = jsonic_get(json_str, array, NULL, 0, jsonic_from_node_free(node), NULL);
+        node = jsonic_get(json_str, array, NULL, 0, jsonic_from_node_free(node), NULL, 0);
         if (node == NULL) break;
         length++;
     }
@@ -97,7 +97,7 @@ extern int jsonic_from_node_free(jsonic_node_t* node) {
 extern jsonic_node_t* jsonic_get_root(
     char* json_str
 ) {
-    return jsonic_get(json_str, NULL, NULL, 0, 0, NULL);
+    return jsonic_get(json_str, NULL, NULL, 0, 0, NULL, 1);
 }
 
 extern jsonic_node_t* jsonic_object_get(
@@ -105,7 +105,7 @@ extern jsonic_node_t* jsonic_object_get(
     jsonic_node_t* current,
     char* key
 ) {
-    return jsonic_get(json_str, current, key, 0, 0, NULL);
+    return jsonic_get(json_str, current, key, 0, 0, NULL, 0);
 }
 
 extern jsonic_node_t* jsonic_array_get(
@@ -113,7 +113,7 @@ extern jsonic_node_t* jsonic_array_get(
     jsonic_node_t* current,
     int index
 ) {
-    return jsonic_get(json_str, current, NULL, index, 0, NULL);
+    return jsonic_get(json_str, current, NULL, index, 0, NULL, 0);
 }
 
 extern jsonic_node_t* jsonic_array_iter(
@@ -122,7 +122,7 @@ extern jsonic_node_t* jsonic_array_iter(
     jsonic_node_t* node,
     int index
 ) {
-    return jsonic_get(json_str, current, NULL, index, jsonic_from_node(node), NULL);
+    return jsonic_get(json_str, current, NULL, index, jsonic_from_node(node), NULL, 0);
 }
 
 extern jsonic_node_t* jsonic_array_iter_free(
@@ -131,7 +131,7 @@ extern jsonic_node_t* jsonic_array_iter_free(
     jsonic_node_t* node,
     int index
 ) {
-    return jsonic_get(json_str, current, NULL, index, jsonic_from_node_free(node), NULL);
+    return jsonic_get(json_str, current, NULL, index, jsonic_from_node_free(node), NULL, 0);
 }
 
 extern jsonic_node_t* jsonic_object_iter(
@@ -140,7 +140,7 @@ extern jsonic_node_t* jsonic_object_iter(
     jsonic_node_t* from,
     char* key
 ) {
-    return jsonic_get(json_str, current, key, 0, jsonic_from_node(from), from);
+    return jsonic_get(json_str, current, key, 0, jsonic_from_node(from), from, 0);
 }
 
 extern jsonic_node_t* jsonic_object_iter_free(
@@ -149,7 +149,7 @@ extern jsonic_node_t* jsonic_object_iter_free(
     jsonic_node_t* from,
     char* key
 ) {
-    jsonic_node_t* node = jsonic_get(json_str, current, key, 0, jsonic_from_node(from), from);
+    jsonic_node_t* node = jsonic_get(json_str, current, key, 0, jsonic_from_node(from), from, 0);
     jsonic_free(&from);
     return node;
 }
@@ -160,7 +160,8 @@ extern jsonic_node_t* jsonic_get(
     char* key,
     int index,
     int from,
-    jsonic_node_t* from_object
+    jsonic_node_t* from_object,
+    int is_get_root
 ) {
     jsonic_node_t* node = malloc(sizeof(jsonic_node_t));
     node->type = JSONIC_NODE_TYPE_NONE;
@@ -260,16 +261,25 @@ extern jsonic_node_t* jsonic_get(
             node->clevel = (node->plevel++ == 0) ? 1: node->clevel;
             node->parser_state = JSONIC_PARSER_STATE_EXPECT_KEY_START;
             
-            if (key == NULL) {
+            if ((key == NULL) || is_get_root) {
+                node->ksync = 0;
+                node->kind = 0;
                 node->type = JSONIC_NODE_TYPE_OBJECT;
+                node->plevel++;
+                node->ind++;
                 return node;
             }
         } else if (c == '[') {
             node->clevel = (node->plevel++ == 0) ? 1: node->clevel;
             node->parser_state = JSONIC_PARSER_STATE_EXPECT_ARR_END;
 
-            if (key == NULL) {
+            if (is_get_root) {
                 node->type = JSONIC_NODE_TYPE_ARRAY;
+                node->ksync = 0;
+                node->kind = 0;
+                node->arrind = 0;
+                node->plevel++;
+                node->ind++;
                 return node;
             }
         } else {

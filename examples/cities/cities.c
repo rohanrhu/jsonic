@@ -21,8 +21,10 @@ int main() {
     struct timeval t0, t1;
     gettimeofday(&t0, NULL);
 
-    jsonic_node_t* type = jsonic_object_get(json_string, NULL, "type");
-    jsonic_node_t* features = jsonic_object_get(json_string, NULL, "features");
+    jsonic_node_t* root = jsonic_get_root(json_string);
+    
+    jsonic_node_t* type = jsonic_object_get(json_string, root, "type");
+    jsonic_node_t* features = jsonic_object_get(json_string, root, "features");
     int features_length = jsonic_array_length(json_string, features);
 
     printf("Type: %s\n", type->val);
@@ -64,6 +66,7 @@ int main() {
         jsonic_free(&coordinate);
         jsonic_free(&coordinate0);
         jsonic_free(&x);
+        jsonic_free(&root);
         if (y) jsonic_free(&y);
     }
 

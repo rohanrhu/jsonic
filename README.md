@@ -84,7 +84,7 @@ void jsonic_free(jsonic_node_t** node);
 Example:
 
 ```c
-jsonic_node_t* members = jsonic_object_get(json_string, NULL, "members");
+jsonic_node_t* members = jsonic_object_get(json_string, jsonic_get_root(json_string), "members");
 ...
 jsonic_free(&members); // free'd and members is set to NULL
 ```
@@ -118,12 +118,10 @@ if (root->type == JSONIC_NODE_TYPE_OBJECT) {
 jsonic_node_t* jsonic_object_get(char* json_str, jsonic_node_t* current, char* key);
 ```
 
-**Notice:** `current` parameter must be `NULL` for getting value of a key from root.
-
 ##### Get an Object Key
 Get a key from JSON root:
 ```c
-jsonic_object_get(json_string, NULL, "someKey");
+jsonic_object_get(json_string, jsonic_get_root(json_string), "someKey");
 ```
 or find an existing node:
 ```c
@@ -135,12 +133,10 @@ jsonic_object_get(json_string, some_object, "someKey");
 jsonic_node_t* jsonic_array_get(char* json_str, jsonic_node_t* current, int index);
 ```
 
-**Notice:** `current` parameter must be `NULL` for getting an item from root.
-
 ##### Get an Element of Array
 Get an array element from JSON Array root:
 ```c
-jsonic_array_get(json_string, NULL, 5);
+jsonic_array_get(json_string, jsonic_get_root(json_string), 5);
 ```
 or find an existing node:
 ```c
@@ -153,12 +149,13 @@ If you are using `jsonic_object_get()` or `jsonic_array_get()` as inline, applic
 ###### Example
 Non-memory-safe usage:
 ```c
-printf("Squad: %s\n", jsonic_object_get(json_string, NULL, "squadName")->val);
+printf("Squad: %s\n", jsonic_object_get(json_string, jsonic_get_root(json_string), "squadName")->val);
 ```
 
 This is memory-safe usage:
 ```c
-jsonic_node_t* name = jsonic_object_get(json_string, NULL, "squadName");
+jsonic_node_t* root = jsonic_get_root(json_string);
+jsonic_node_t* name = jsonic_object_get(json_string, root, "squadName");
 
 if (name != NULL) {
     if (name->type == JSONIC_NODE_TYPE_STRING) {
@@ -243,14 +240,16 @@ An example for reading JSON data
 ```c
 char* json_string = jsonic_from_file("heroes.json");
 
-jsonic_node_t* members = jsonic_object_get(json_string, NULL, "members");
+jsonic_node_t* root = jsonic_get_root(json_string);
+
+jsonic_node_t* members = jsonic_object_get(json_string, root, "members");
 jsonic_node_t* member = jsonic_array_get(json_string, members, 1);
 jsonic_node_t* powers = jsonic_object_get(json_string, member, "powers");
 
 // inline usage: non-free'd nodes and non-safe pointers!..
-printf("Squad: %s\n", jsonic_object_get(json_string, NULL, "squadName")->val);
-printf("Active: %s\n", jsonic_object_get(json_string, NULL, "active")->val);
-printf("Formed: %s\n", jsonic_object_get(json_string, NULL, "formed")->val);
+printf("Squad: %s\n", jsonic_object_get(json_string, root, "squadName")->val);
+printf("Active: %s\n", jsonic_object_get(json_string, root, "active")->val);
+printf("Formed: %s\n", jsonic_object_get(json_string, root, "formed")->val);
 printf("Name: %s\n", jsonic_object_get(json_string, member, "name")->val);
 printf("Age: %s\n", jsonic_object_get(json_string, member, "age")->val);
 printf("Powers (%d total):\n", jsonic_array_length(json_string, powers));
@@ -268,6 +267,7 @@ for (;;) {
 jsonic_free(&members);
 jsonic_free(&member);
 jsonic_free(&powers);
+jsonic_free(&root);
 free(json_string);
 ```
 
@@ -315,6 +315,9 @@ Example JSON (heroes.json):
     ]
 }
 ```
+
+## JSON Type Checking
+You must check JSON node for `jsonic_object_get()` or `jsonic_array_get()` from it. Otherwise you will get some absurd data. (e.g. Trying get a key's value from an array.)
 
 ## Syntax Checking
 This library does not check JSON syntax, so you may get `SIGSEGV` or maybe infinite loops for **corrupt JSONs**. Likewise in some cases of corrupt JSONs, it would work as properly.

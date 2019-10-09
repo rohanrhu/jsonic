@@ -20,7 +20,9 @@ int main() {
     struct timeval t0, t1;
     gettimeofday(&t0, NULL);
 
-    jsonic_node_t* statuses = jsonic_object_get(json_string, NULL, "statuses");
+    jsonic_node_t* root = jsonic_get_root(json_string);
+    
+    jsonic_node_t* statuses = jsonic_object_get(json_string, root, "statuses");
     int statuses_length = jsonic_array_length(json_string, statuses);
 
     jsonic_node_t* id;
@@ -55,6 +57,7 @@ int main() {
     }
 
     jsonic_free(&statuses);
+    jsonic_free(&root);
     free(json_string);
     
     gettimeofday(&t1, NULL);

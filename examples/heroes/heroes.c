@@ -20,14 +20,16 @@ int main() {
     struct timeval t0, t1;
     gettimeofday(&t0, NULL);
     
-    jsonic_node_t* members = jsonic_object_get(json_string, NULL, "members");
+    jsonic_node_t* root = jsonic_get_root(json_string);
+
+    jsonic_node_t* members = jsonic_object_get(json_string, root, "members");
     jsonic_node_t* member = jsonic_array_get(json_string, members, 1);
     jsonic_node_t* powers = jsonic_object_get(json_string, member, "powers");
     
     // inline usage: non-free'd nodes and non-safe pointers!..
-    printf("Squad: %s\n", jsonic_object_get(json_string, NULL, "squadName")->val);
-    printf("Active: %s\n", jsonic_object_get(json_string, NULL, "active")->val);
-    printf("Formed: %s\n", jsonic_object_get(json_string, NULL, "formed")->val);
+    printf("Squad: %s\n", jsonic_object_get(json_string, root, "squadName")->val);
+    printf("Active: %s\n", jsonic_object_get(json_string, root, "active")->val);
+    printf("Formed: %s\n", jsonic_object_get(json_string, root, "formed")->val);
     printf("Name: %s\n", jsonic_object_get(json_string, member, "name")->val);
     printf("Age: %s\n", jsonic_object_get(json_string, member, "age")->val);
     printf("Powers (%d total):\n", jsonic_array_length(json_string, powers));
@@ -45,6 +47,7 @@ int main() {
     jsonic_free(&members);
     jsonic_free(&member);
     jsonic_free(&powers);
+    jsonic_free(&root);
     free(json_string);
     
     gettimeofday(&t1, NULL);

@@ -52,7 +52,7 @@ struct jsonic_node {
 extern char* jsonic_from_file(char* fname);
 extern void jsonic_free_addr(jsonic_node_t* node);
 extern void jsonic_free(jsonic_node_t** node);
-extern jsonic_node_t* jsonic_get(char* json_str, jsonic_node_t* current, char* key, int index, int from, jsonic_node_t* from_node);
+extern jsonic_node_t* jsonic_get(char* json_str, jsonic_node_t* current, char* key, int index, int from, jsonic_node_t* from_node, int is_get_root);
 extern jsonic_node_t* jsonic_get_root(char* json_str);
 extern jsonic_node_t* jsonic_object_get(char* json_str, jsonic_node_t* current, char* key);
 extern jsonic_node_t* jsonic_object_iter(char* json_str, jsonic_node_t* current, jsonic_node_t* from, char* key);
