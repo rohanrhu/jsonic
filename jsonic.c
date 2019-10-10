@@ -66,6 +66,38 @@ extern int jsonic_array_length(char* json_str, jsonic_node_t* array) {
     return length;
 }
 
+extern int jsonic_array_length_from(
+    char* json_str,
+    jsonic_node_t* array,
+    jsonic_node_t* from
+) {
+    int length;
+    jsonic_node_t* node = NULL;
+
+    int wf = 0;
+    int from_i;
+    jsonic_node_t* from_n;
+    for (length=0;;) {
+        if (node == NULL) {
+            from_i = jsonic_from_node(from);
+            from_n = from;
+        } else {
+            from_i = jsonic_from_node(node);
+            from_n = node;
+            wf = 1;
+        }
+
+        node = jsonic_get(json_str, array, NULL, 0, from_i, from_n, 0);
+        if (node == NULL) break;
+        if (wf) {
+            jsonic_free(&from_n);
+        }
+        length++;
+    }
+
+    return length;
+}
+
 extern int jsonic_from_node(jsonic_node_t* node) {
     if (!node) {
         return 0;
@@ -175,6 +207,9 @@ extern jsonic_node_t* jsonic_get(
     node->kind = 0;
     node->arrind = 0;
     node->meta = 0;
+    node->pos = (key == NULL) 
+                ? ((from_object == NULL) ? 0: from_object->pos)
+                : ((from_object == NULL) ? -1: from_object->pos);
 
     if (key == NULL) {
         if (from > 0) {
@@ -387,6 +422,7 @@ extern jsonic_node_t* jsonic_get(
         }
 
         if (c == '"') {
+            node->pos++;
             node->ksync = 1;
             node->kind = 0;
             node->parser_state = JSONIC_PARSER_STATE_EXPECT_KEY_END;
@@ -590,6 +626,7 @@ extern jsonic_node_t* jsonic_get(
             *node->val = '\0';
             node->len = 0;
         } else if (c == ',') {
+            node->pos++;
             node->arrind++;
         } else if (c == ']') {
             jsonic_free(&node);
@@ -657,6 +694,7 @@ extern jsonic_node_t* jsonic_get(
             jsonic_free(&node);
             return NULL;
         } else if (c == ',') {
+            node->pos++;
             node->arrind++;
             node->parser_state = JSONIC_PARSER_STATE_EXPECT_ARR_END;
         }
@@ -672,6 +710,7 @@ extern jsonic_node_t* jsonic_get(
             return NULL;
         } else {
             if (c == ',') {
+                node->pos++;
                 node->arrind++;
             }
             
@@ -689,6 +728,7 @@ extern jsonic_node_t* jsonic_get(
             return NULL;
         } else {
             if (c == ',') {
+                node->pos++;
                 node->arrind++;
             }
             

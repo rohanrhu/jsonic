@@ -37,16 +37,17 @@ typedef struct jsonic_node jsonic_node_t;
 struct jsonic_node {
     int type;
     char* val;
-    int len;
-    int plevel;
-    int clevel;
-    int ind;
-    int kind;
-    int arrind;
+    unsigned int len;
+    unsigned int plevel;
+    unsigned int clevel;
+    unsigned int ind;
+    unsigned int kind;
+    unsigned int arrind;
     int parser_state;
     int ksync;
     int meta;
-    int from;
+    unsigned int from;
+    unsigned int pos;
 };
 
 extern char* jsonic_from_file(char* fname);
@@ -61,6 +62,7 @@ extern jsonic_node_t* jsonic_array_get(char* json_str, jsonic_node_t* current, i
 extern jsonic_node_t* jsonic_array_iter(char* json_str, jsonic_node_t* current, jsonic_node_t* node, int index);
 extern jsonic_node_t* jsonic_array_iter_free(char* json_str, jsonic_node_t* current, jsonic_node_t* node, int index);
 extern int jsonic_array_length(char* json_str, jsonic_node_t* array);
+extern int jsonic_array_length_from(char* json_str, jsonic_node_t* array, jsonic_node_t* from);
 extern int jsonic_from_node(jsonic_node_t* node);
 extern int jsonic_from_node_free(jsonic_node_t* node);
 

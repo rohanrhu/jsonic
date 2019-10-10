@@ -27,6 +27,8 @@ int main() {
     jsonic_node_t* powers = jsonic_object_get(json_string, member, "powers");
     
     // inline usage: non-free'd nodes and non-safe pointers!..
+    // using jsonic_object_get() is poor way because of reading it from start of json each time!
+    // use jsonic_object_iter() or jsonic_object_iter_free() instead of jsonic_object_get().
     printf("Squad: %s\n", jsonic_object_get(json_string, root, "squadName")->val);
     printf("Active: %s\n", jsonic_object_get(json_string, root, "active")->val);
     printf("Formed: %s\n", jsonic_object_get(json_string, root, "formed")->val);
@@ -40,7 +42,12 @@ int main() {
         if (!power) break;
         
         if (power->type == JSONIC_NODE_TYPE_STRING) {
-            printf("\t%s\n", power->val);
+            printf(
+                "\t%s (pos: %d, from len: %d)\n",
+                power->val,
+                power->pos,
+                jsonic_array_length_from(json_string, powers, power)
+            );
         }
     }
 

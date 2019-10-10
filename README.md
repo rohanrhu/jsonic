@@ -29,14 +29,16 @@ typedef struct jsonic_node jsonic_node_t;
 struct jsonic_node {
     int type;
     char* val;
-    int len;
+    unsigned int len;
+    unsigned int pos;
     ...
 };
 ```
 
-You will use structure members: `type`, `val`, `len` for reading JSON.
+You will use structure members: `type`, `val`, `len` and `pos` for reading JSON.
 
 `val` is useable for **string**, **number**, **boolean** and **null** types. `val` is a NULL Terminated String and you can get length of string via `len` for string values.
+`pos` is useable for getting iteration position for arrays/objects.
 
 #### String Values
 String values come as NULL Terminated String in `val` and you can check them with `node->type == JSONIC_NODE_TYPE_STRING`.
@@ -51,9 +53,13 @@ Boolean values come as NULL Terminated String in `val`. `val` maybe `"1"` or `"0
 Null values come as NULL Terminated String in `val` as `"0"` and you can check them with `node->type == JSONIC_NODE_TYPE_NULL`.
 
 #### Result Length
-`len` is useable for **string**, **number**, **boolean** and **null** types and does not give length of an **array**. You can use [jsonic_array_length()](#jsonic_array_length) for getting an array's length.
+`len` is useable for **string**, **number**, **boolean** and **null** types and does not give length of an **array**.
+You can use [jsonic_array_length()](#jsonic_array_length) or [jsonic_array_length_from()](#jsonic_array_length_from) for getting an array's length.
 
-### jsonic node types
+#### Iteration Position
+`node->pos` is useable for objects and arrays both. It gives current index of current iterated array item or object key&value.
+
+### JSON Types
 There are a few node types:
 
 ```c
@@ -143,8 +149,17 @@ or find an existing node:
 jsonic_array_get(json_string, some_array, 5);
 ```
 
-##### Inline Usage of `jsonic_object_get()` or `jsonic_array_get()`
-If you are using `jsonic_object_get()` or `jsonic_array_get()` as inline, application will have memory leaks and it will be non-memory-safe, so you may get `SIGSEGV`!
+##### Inline Usage
+If you are using these functions as inline, application will have memory leaks and it will be non-memory-safe, so you may get `SIGSEGV`!
+```c
+extern jsonic_node_t* jsonic_get_root(char* json_str);
+extern jsonic_node_t* jsonic_object_get(char* json_str, jsonic_node_t* current, char* key);
+extern jsonic_node_t* jsonic_object_iter(char* json_str, jsonic_node_t* current, jsonic_node_t* from, char* key);
+extern jsonic_node_t* jsonic_object_iter_free(char* json_str, jsonic_node_t* current, jsonic_node_t* from, char* key);
+extern jsonic_node_t* jsonic_array_get(char* json_str, jsonic_node_t* current, int index);
+extern jsonic_node_t* jsonic_array_iter(char* json_str, jsonic_node_t* current, jsonic_node_t* node, int index);
+extern jsonic_node_t* jsonic_array_iter_free(char* json_str, jsonic_node_t* current, jsonic_node_t* node, int index);
+```
 
 ###### Example
 Non-memory-safe usage:
@@ -164,11 +179,18 @@ if (name != NULL) {
 
     jsonic_free(&name);
 }
+
+jsonic_free(&root);
 ```
 
 #### jsonic_array_length()
 ```c
 int jsonic_array_length(char* json_str, jsonic_node_t* array);
+```
+
+#### jsonic_array_length_from()
+```c
+int jsonic_array_length_from(char* json_str, jsonic_node_t* array, jsonic_node_t* from);
 ```
 
 #### jsonic_array_iter()
@@ -247,6 +269,8 @@ jsonic_node_t* member = jsonic_array_get(json_string, members, 1);
 jsonic_node_t* powers = jsonic_object_get(json_string, member, "powers");
 
 // inline usage: non-free'd nodes and non-safe pointers!..
+// using jsonic_object_get() is poor way because of reading it from start of json each time!
+// use jsonic_object_iter() or jsonic_object_iter_free() instead of jsonic_object_get().
 printf("Squad: %s\n", jsonic_object_get(json_string, root, "squadName")->val);
 printf("Active: %s\n", jsonic_object_get(json_string, root, "active")->val);
 printf("Formed: %s\n", jsonic_object_get(json_string, root, "formed")->val);
@@ -260,7 +284,12 @@ for (;;) {
     if (!power) break;
     
     if (power->type == JSONIC_NODE_TYPE_STRING) {
-        printf("\t%s\n", power->val);
+        printf(
+            "\t%s (pos: %d, from len: %d)\n",
+            power->val,
+            power->pos,
+            jsonic_array_length_from(json_string, powers, power)
+        );
     }
 }
 
