@@ -151,19 +151,21 @@ extern jsonic_node_t* jsonic_array_get(
 extern jsonic_node_t* jsonic_array_iter(
     char* json_str,
     jsonic_node_t* current,
-    jsonic_node_t* node,
+    jsonic_node_t* from,
     int index
 ) {
-    return jsonic_get(json_str, current, NULL, index, jsonic_from_node(node), NULL, 0);
+    return jsonic_get(json_str, current, NULL, index, jsonic_from_node(from), from, 0);
 }
 
 extern jsonic_node_t* jsonic_array_iter_free(
     char* json_str,
     jsonic_node_t* current,
-    jsonic_node_t* node,
+    jsonic_node_t* from,
     int index
 ) {
-    return jsonic_get(json_str, current, NULL, index, jsonic_from_node_free(node), NULL, 0);
+    jsonic_node_t* node = jsonic_get(json_str, current, NULL, index, jsonic_from_node(from), from, 0);
+    jsonic_free(&from);
+    return node;
 }
 
 extern jsonic_node_t* jsonic_object_iter(
