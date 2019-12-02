@@ -388,6 +388,7 @@ extern jsonic_node_t* jsonic_get(
             char* v = node->val;
             node->val = malloc(1*(len+2));
             strcpy(node->val, v);
+            free(v);
             node->val[len] = c;
             node->val[len+1] = '\0';
         } else {
@@ -413,6 +414,7 @@ extern jsonic_node_t* jsonic_get(
             char* v = node->val;
             node->val = malloc(1*(node->len+2));
             strcpy(node->val, v);
+            free(v);
             node->val[node->len] = c;
             node->val[node->len+1] = '\0';
             node->len++;
@@ -675,6 +677,7 @@ extern jsonic_node_t* jsonic_get(
             char* v = node->val;
             node->val = malloc(1*(node->len+2));
             strcpy(node->val, v);
+            free(v);
             node->val[node->len] = c;
             node->val[node->len+1] = '\0';
             node->len++;
@@ -690,6 +693,7 @@ extern jsonic_node_t* jsonic_get(
             char* v = node->val;
             node->val = malloc(1*(len+2));
             strcpy(node->val, v);
+            free(v);
             node->val[len] = c;
             node->val[len+1] = '\0';
         } if (c ==']') {
