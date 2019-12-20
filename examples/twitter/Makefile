@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -std=c99 -I../../ -g
+CFLAGS = -std=c99 -I../../ -g -O3
 JSONIC_SOURCES = $(filter-out $(shell find ../../ -path "*/examples/*"), $(shell find ../../ -name "*.c"))
 JSONIC_HEADERS = $(filter-out $(shell find ../../ -path "*/examples/*"), $(shell find ../../ -name "*.h"))
 JSONIC_OBJ = $(JSONIC_SOURCES:.c=.o)

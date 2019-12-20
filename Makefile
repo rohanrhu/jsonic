@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -std=c99 -I. -g
+CFLAGS = -std=c99 -I. -g -O3
 SOURCES = $(filter-out $(shell find . -path "*/examples/*"), $(shell find . -name "*.c"))
 HEADERS = $(filter-out $(shell find . -path "*/examples/*"), $(shell find . -name "*.h"))
 EXECUTABLES = $(shell find . -name "*.exe")
