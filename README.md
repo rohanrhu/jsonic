@@ -22,7 +22,7 @@ gcc -o example.exe example.c /path/to/jsonic/jsonic.o -I /path/to/jsonic
 ## Reading JSON
 
 ### jsonic node
-Every JSON result ([except not found result](#not-found-results)) is a `jsonic_node_t` object in jsonic.
+Every JSON result is a `jsonic_node_t` object in jsonic.
 
 ```c
 typedef struct jsonic_node jsonic_node_t;
