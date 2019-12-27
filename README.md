@@ -27,30 +27,33 @@ Every JSON result ([except not found result](#not-found-results)) is a `jsonic_n
 ```c
 typedef struct jsonic_node jsonic_node_t;
 struct jsonic_node {
-    int type;
+    char* key;
     char* val;
+    jsonic_node_type_t type;
     unsigned int len;
     unsigned int pos;
     ...
 };
 ```
 
-You will use structure members: `type`, `val`, `len` and `pos` for reading JSON.
+You will use structure members: `type`, `key`, `val`, `len` and `pos` for reading JSON.
 
 `val` is useable for **string**, **number**, **boolean** and **null** types. `val` is a NULL Terminated String and you can get length of string via `len` for string values.
 `pos` is useable for getting iteration position for arrays/objects.
 
+`key` is useable NULL Terminated String for Key=>Value iteration results.
+
 #### String Values
-String values come as NULL Terminated String in `val` and you can check them with `node->type == JSONIC_NODE_TYPE_STRING`.
+String values come as NULL Terminated String in `val` and you can check them with `node->type == STRING`.
 
 #### Number Values
-Number values come as NULL Terminated String in `val` and you can check them with `node->type == JSONIC_NODE_TYPE_NUMBER`.
+Number values come as NULL Terminated String in `val` and you can check them with `node->type == NUMBER`.
 
 #### Boolean Values
-Boolean values come as NULL Terminated String in `val`. `val` maybe `"1"` or `"0"` for boolean values and you can check them with `node->type == JSONIC_NODE_TYPE_BOOLEAN`.
+Boolean values come as NULL Terminated String in `val`. `val` maybe `"1"` or `"0"` for boolean values and you can check them with `node->type == BOOLEAN`.
 
 #### Null Values
-Null values come as NULL Terminated String in `val` as `"0"` and you can check them with `node->type == JSONIC_NODE_TYPE_NULL`.
+Null values come as NULL Terminated String in `val` as `"0"` and you can check them with `node->type == NULLVAL`.
 
 #### Result Length
 `len` is useable for **string**, **number**, **boolean** and **null** types and does not give length of an **array**.
@@ -58,25 +61,44 @@ You can use [jsonic_array_length()](#jsonic_array_length) or [jsonic_array_lengt
 
 #### Iteration Position
 `node->pos` is useable for objects and arrays both. It gives current index of current iterated array item or object key&value.
+Also you can use it for not found result nodes.
 
 ### JSON Types
-There are a few node types:
-
 ```c
-#define JSONIC_NODE_TYPE_NONE 0
-#define JSONIC_NODE_TYPE_OBJECT 1
-#define JSONIC_NODE_TYPE_ARRAY 2
-#define JSONIC_NODE_TYPE_STRING 3
-#define JSONIC_NODE_TYPE_NUMBER 4
-#define JSONIC_NODE_TYPE_BOOLEAN 5
-#define JSONIC_NODE_TYPE_NULL 6
+enum JSONIC_NODE_TYPES {
+    NONE,
+    OBJECT,
+    ARRAY,
+    STRING,
+    NUMBER,
+    BOOLEAN,
+    NULLVAL
+};
+typedef enum JSONIC_NODE_TYPES jsonic_node_type_t;
 ```
 
 #### Not Found Results
-You will never get a node with type `JSONIC_NODE_TYPE_NONE`, you will get `NULL` instead of a `jsonic_node_t` object pointer if result is not found.
+You will get a node with type `NONE` for not found results and of course you need freeing it.
+
+##### Checking Length for Not Found Results
+You can check how many items itered at total including searching the not found result node.
+
+###### Examples
+```c
+jsonic_node_t* not_exists_key = jsonic_object_get(json_string, root, "not_exists_key");
+printf("Count: %d\n\n", not_exists_key->pos); // not_exists_key->pos+1 is how many items itered.
+```
+
+```c
+jsonic_node_t* an_exists_key = jsonic_object_get(json_string, root, "an_exists_key");
+jsonic_node_t* not_exists_key = jsonic_object_iter(json_string, root, an_exists_key, "not_exists_key");
+
+// not_exists_key->pos+1 is how many items itered at total including an_exists_key.
+printf("Count: %d\n\n", not_exists_key->pos);
+```
 
 ### Functions
-There are a few functions in jsonic.
+There are various functions in Jsonic for walking and iterating on JSON.
 
 #### jsonic_from_file()
 ```c
@@ -110,12 +132,20 @@ jsonic_node_t* jsonic_get_root(char* json_str);
 ```c
 jsonic_node_t* root = jsonic_get_root(json_string);
 
-if (root->type == JSONIC_NODE_TYPE_OBJECT) {
+if (root->type == NONE) {
+    printf("JSON root is none.\n");
+} else if (root->type == OBJECT) {
     printf("JSON root is an object.\n");
-} else if (root->type == JSONIC_NODE_TYPE_ARRAY) {
+} else if (root->type == ARRAY) {
     printf("JSON root is an array.\n");
-} else if (root->type == JSONIC_NODE_TYPE_STRING) {
+} else if (root->type == STRING) {
     printf("JSON root is a string.\n");
+} else if (root->type == NUMBER) {
+    printf("JSON root is a number.\n");
+} else if (root->type == BOOLEAN) {
+    printf("JSON root is a boolean.\n");
+} else if (root->type == NULLVAL) {
+    printf("JSON root is null.\n");
 }
 ```
 
@@ -156,6 +186,8 @@ extern jsonic_node_t* jsonic_get_root(char* json_str);
 extern jsonic_node_t* jsonic_object_get(char* json_str, jsonic_node_t* current, char* key);
 extern jsonic_node_t* jsonic_object_iter(char* json_str, jsonic_node_t* current, jsonic_node_t* from, char* key);
 extern jsonic_node_t* jsonic_object_iter_free(char* json_str, jsonic_node_t* current, jsonic_node_t* from, char* key);
+extern jsonic_node_t* jsonic_object_iter_kv(char* json_str, jsonic_node_t* current, jsonic_node_t* from);
+extern jsonic_node_t* jsonic_object_iter_kv_free(char* json_str, jsonic_node_t* current, jsonic_node_t* from);
 extern jsonic_node_t* jsonic_array_get(char* json_str, jsonic_node_t* current, int index);
 extern jsonic_node_t* jsonic_array_iter(char* json_str, jsonic_node_t* current, jsonic_node_t* node, int index);
 extern jsonic_node_t* jsonic_array_iter_free(char* json_str, jsonic_node_t* current, jsonic_node_t* node, int index);
@@ -173,7 +205,7 @@ jsonic_node_t* root = jsonic_get_root(json_string);
 jsonic_node_t* name = jsonic_object_get(json_string, root, "squadName");
 
 if (name != NULL) {
-    if (name->type == JSONIC_NODE_TYPE_STRING) {
+    if (name->type == STRING) {
         printf("Squad: %s\n", name->val);
     }
 
@@ -213,7 +245,7 @@ You can use `jsonic_array_iter()` or `jsonic_array_iter_free()`.
 jsonic_node_t* power = NULL;
 for (;;) {
     power = jsonic_array_iter_free(json_string, powers, power, 0);
-    if (!power) break;
+    if (power->type == NONE) break;
 }
 ```
 
@@ -235,10 +267,38 @@ jsonic_node_t* jsonic_object_iter_free(char* json_str, jsonic_node_t* current, j
 
 Same as `jsonic_object_iter()` but frees given jsonic object (`from`).
 
-##### Iterating Objects
+#### jsonic_object_iter_kv()
+```c
+jsonic_node_t* kv = jsonic_object_iter_kv(json_string, current, from);
+```
+
+Useable for object iteration as `key: value` pairs in `current` starting from `from`.
+
+#### jsonic_object_iter_kv_free()
+```c
+jsonic_node_t* kv = jsonic_object_iter_kv_free(json_string, current, from);
+```
+
+Same as `jsonic_object_iter_kv()` but frees given jsonic object (`from`).
+
+##### Iterating Objects with a Key
 You can use `jsonic_object_iter()` or `jsonic_object_iter_free()`.
 ```c
 jsonic_node_t* node = jsonic_object_iter(json_string, something, previousNode, "someKey");
+```
+
+##### Iterating Objects as `Key: Value` Pairs
+You can use `jsonic_object_iter_kv()` or `jsonic_object_iter_kv_free()`.
+```c
+jsonic_node_t* key = NULL;
+for (;;) {
+    key = jsonic_object_iter_kv_free(json_string, keys, key);
+    if (key->type == NONE) break;
+    
+    if ((key->type == STRING) || (key->type == NUMBER)) {
+        printf("%s => %s\n", key->key, key->val);
+    }
+}
 ```
 
 ## Compile and Run Examples
@@ -281,9 +341,9 @@ printf("Powers (%d total):\n", jsonic_array_length(json_string, powers));
 jsonic_node_t* power = NULL;
 for (;;) {
     power = jsonic_array_iter_free(json_string, powers, power, 0);
-    if (!power) break;
+    if (power->type == NONE) break;
     
-    if (power->type == JSONIC_NODE_TYPE_STRING) {
+    if (power->type == STRING) {
         printf(
             "\t%s (pos: %d, from len: %d)\n",
             power->val,
@@ -353,9 +413,6 @@ This library does not check JSON syntax, so you may get `SIGSEGV` or maybe infin
 
 ## Performance
 There are some example JSONs and reading examples in `examples/` folder for profiling the performance.
-
-## TODO
-* Function for iterating `key`=>`value` pairs.
 
 ## License
 MIT

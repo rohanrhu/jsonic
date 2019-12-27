@@ -39,9 +39,9 @@ int main() {
     jsonic_node_t* power = NULL;
     for (;;) {
         power = jsonic_array_iter_free(json_string, powers, power, 0);
-        if (!power) break;
+        if (power->type == NONE) break;
         
-        if (power->type == JSONIC_NODE_TYPE_STRING) {
+        if (power->type == STRING) {
             printf(
                 "\t%s (pos: %d, from len: %d)\n",
                 power->val,

@@ -34,13 +34,13 @@ extern void jsonic_free_addr(jsonic_node_t* node) {
     if (node == NULL) return;
 
     if (
-        (node->type == JSONIC_NODE_TYPE_BOOLEAN)
+        (node->type == BOOLEAN)
         ||
-        (node->type == JSONIC_NODE_TYPE_NULL)
+        (node->type == NULLVAL)
         ||
-        (node->type == JSONIC_NODE_TYPE_STRING)
+        (node->type == STRING)
         ||
-        (node->type == JSONIC_NODE_TYPE_NUMBER)
+        (node->type == NUMBER)
     ) {
         free(node->val);
     }
@@ -58,8 +58,8 @@ extern int jsonic_array_length(char* json_str, jsonic_node_t* array) {
     jsonic_node_t* node = NULL;
 
     for (length=0;;) {
-        node = jsonic_get(json_str, array, NULL, 0, jsonic_from_node_free(node), NULL, 0);
-        if (node == NULL) break;
+        node = jsonic_get(json_str, array, NULL, 0, jsonic_from_node_free(node), NULL, 0, 0);
+        if ((node == NULL) || (node->type == NONE)) break;
         length++;
     }
 
@@ -78,7 +78,7 @@ extern int jsonic_array_length_from(
     int from_i;
     jsonic_node_t* from_n;
     for (length=0;;) {
-        if (node == NULL) {
+        if ((node == NULL) || (node->type == NONE)) {
             from_i = jsonic_from_node(from);
             from_n = from;
         } else {
@@ -87,10 +87,10 @@ extern int jsonic_array_length_from(
             wf = 1;
         }
 
-        node = jsonic_get(json_str, array, NULL, 0, from_i, from_n, 0);
-        if (node == NULL) break;
+        node = jsonic_get(json_str, array, NULL, 0, from_i, from_n, 0, 0);
+        if ((node == NULL) || (node->type == NONE)) break;
         if (wf) {
-            jsonic_free(&from_n);
+            jsonic_free_addr(from_n);
         }
         length++;
     }
@@ -103,17 +103,17 @@ extern int jsonic_from_node(jsonic_node_t* node) {
         return 0;
     }
 
-    if (node->type == JSONIC_NODE_TYPE_OBJECT) {
+    if (node->type == OBJECT) {
         return node->ind-1;
-    } else if (node->type == JSONIC_NODE_TYPE_ARRAY) {
+    } else if (node->type == ARRAY) {
         return node->ind-1;
-    } else if (node->type == JSONIC_NODE_TYPE_STRING) {
+    } else if (node->type == STRING) {
         return node->ind;
-    } else if (node->type == JSONIC_NODE_TYPE_NUMBER) {
+    } else if (node->type == NUMBER) {
         return node->ind;
-    } else if (node->type == JSONIC_NODE_TYPE_BOOLEAN) {
+    } else if (node->type == BOOLEAN) {
         return node->ind;
-    } else if (node->type == JSONIC_NODE_TYPE_NULL) {
+    } else if (node->type == NULLVAL) {
         return node->ind;
     }
 
@@ -122,14 +122,14 @@ extern int jsonic_from_node(jsonic_node_t* node) {
 
 extern int jsonic_from_node_free(jsonic_node_t* node) {
     int from = jsonic_from_node(node);
-    if (node) jsonic_free(&node);
+    if (node) jsonic_free_addr(node);
     return from;
 }
 
 extern jsonic_node_t* jsonic_get_root(
     char* json_str
 ) {
-    return jsonic_get(json_str, NULL, NULL, 0, 0, NULL, 1);
+    return jsonic_get(json_str, NULL, NULL, 0, 0, NULL, 1, 0);
 }
 
 extern jsonic_node_t* jsonic_object_get(
@@ -137,7 +137,7 @@ extern jsonic_node_t* jsonic_object_get(
     jsonic_node_t* current,
     char* key
 ) {
-    return jsonic_get(json_str, current, key, 0, 0, NULL, 0);
+    return jsonic_get(json_str, current, key, 0, 0, NULL, 0, 0);
 }
 
 extern jsonic_node_t* jsonic_array_get(
@@ -145,7 +145,7 @@ extern jsonic_node_t* jsonic_array_get(
     jsonic_node_t* current,
     int index
 ) {
-    return jsonic_get(json_str, current, NULL, index, 0, NULL, 0);
+    return jsonic_get(json_str, current, NULL, index, 0, NULL, 0, 0);
 }
 
 extern jsonic_node_t* jsonic_array_iter(
@@ -154,7 +154,7 @@ extern jsonic_node_t* jsonic_array_iter(
     jsonic_node_t* from,
     int index
 ) {
-    return jsonic_get(json_str, current, NULL, index, jsonic_from_node(from), from, 0);
+    return jsonic_get(json_str, current, NULL, index, jsonic_from_node(from), from, 0, 0);
 }
 
 extern jsonic_node_t* jsonic_array_iter_free(
@@ -163,8 +163,8 @@ extern jsonic_node_t* jsonic_array_iter_free(
     jsonic_node_t* from,
     int index
 ) {
-    jsonic_node_t* node = jsonic_get(json_str, current, NULL, index, jsonic_from_node(from), from, 0);
-    jsonic_free(&from);
+    jsonic_node_t* node = jsonic_get(json_str, current, NULL, index, jsonic_from_node(from), from, 0, 0);
+    jsonic_free_addr(from);
     return node;
 }
 
@@ -174,7 +174,7 @@ extern jsonic_node_t* jsonic_object_iter(
     jsonic_node_t* from,
     char* key
 ) {
-    return jsonic_get(json_str, current, key, 0, jsonic_from_node(from), from, 0);
+    return jsonic_get(json_str, current, key, 0, jsonic_from_node(from), from, 0, 0);
 }
 
 extern jsonic_node_t* jsonic_object_iter_free(
@@ -183,8 +183,26 @@ extern jsonic_node_t* jsonic_object_iter_free(
     jsonic_node_t* from,
     char* key
 ) {
-    jsonic_node_t* node = jsonic_get(json_str, current, key, 0, jsonic_from_node(from), from, 0);
-    jsonic_free(&from);
+    jsonic_node_t* node = jsonic_get(json_str, current, key, 0, jsonic_from_node(from), from, 0, 0);
+    jsonic_free_addr(from);
+    return node;
+}
+
+extern jsonic_node_t* jsonic_object_iter_kv(
+    char* json_str,
+    jsonic_node_t* current,
+    jsonic_node_t* from
+) {
+    return jsonic_get(json_str, current, NULL, 0, jsonic_from_node(from), from, 0, 1);
+}
+
+extern jsonic_node_t* jsonic_object_iter_kv_free(
+    char* json_str,
+    jsonic_node_t* current,
+    jsonic_node_t* from
+) {
+    jsonic_node_t* node = jsonic_get(json_str, current, NULL, 0, jsonic_from_node(from), from, 0, 1);
+    jsonic_free_addr(from);
     return node;
 }
 
@@ -195,12 +213,13 @@ extern jsonic_node_t* jsonic_get(
     int index,
     int from,
     jsonic_node_t* from_object,
-    int is_get_root
+    int is_get_root,
+    int is_kv_iter
 ) {
     jsonic_node_t* node = malloc(sizeof(jsonic_node_t));
-    node->type = JSONIC_NODE_TYPE_NONE;
+    node->type = NONE;
     node->parser_state = (current == NULL) 
-                         ? JSONIC_PARSER_STATE_EXPECT_ANY
+                         ? EXPECT_ANY
                          : current->parser_state;
     node->plevel = (current == NULL) ? 0: current->plevel;
     node->clevel = node->plevel;
@@ -209,9 +228,11 @@ extern jsonic_node_t* jsonic_get(
     node->kind = 0;
     node->arrind = 0;
     node->meta = 0;
-    node->pos = (key == NULL) 
+    node->pos = ((key == NULL) && !is_kv_iter) 
                 ? ((from_object == NULL) ? 0: from_object->pos)
-                : ((from_object == NULL) ? -1: from_object->pos);
+                : ((from_object == NULL) ? 0: from_object->pos);
+
+    int is_key_itered = 0;
 
     if (key == NULL) {
         if (from > 0) {
@@ -219,14 +240,14 @@ extern jsonic_node_t* jsonic_get(
         }
     } else {
         if (from > 0) {
-            if (from_object->type == JSONIC_NODE_TYPE_OBJECT) {
+            if (from_object->type == OBJECT) {
                 node->ind++;
                 node->plevel++;
-            } else if (from_object->type == JSONIC_NODE_TYPE_ARRAY) {
+            } else if (from_object->type == ARRAY) {
                 node->ind++;
                 node->plevel++;
             } else {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_KEY_START;
+                node->parser_state = EXPECT_KEY_START;
             }
         }
     }
@@ -246,7 +267,7 @@ extern jsonic_node_t* jsonic_get(
 
     if (c == '\0') {
         if (node->plevel == 0) {
-            if (node->type == JSONIC_NODE_TYPE_NUMBER) {
+            if (node->type == NUMBER) {
                 return node;
             }
         }
@@ -283,9 +304,9 @@ extern jsonic_node_t* jsonic_get(
         (c == '\\')
         &&
         (
-            (node->parser_state == JSONIC_PARSER_STATE_EXPECT_VAL_END)
+            (node->parser_state == EXPECT_VAL_END)
             ||
-            (node->parser_state == JSONIC_PARSER_STATE_EXPECT_ARR_STR_END)
+            (node->parser_state == EXPECT_ARR_STR_END)
         )
     ) {
         node->meta = 1;
@@ -293,25 +314,25 @@ extern jsonic_node_t* jsonic_get(
         goto next;
     }
 
-    if (node->parser_state == JSONIC_PARSER_STATE_EXPECT_ANY) {
+    if (node->parser_state == EXPECT_ANY) {
         if (c == '{') {
             node->clevel = (node->plevel++ == 0) ? 1: node->clevel;
-            node->parser_state = JSONIC_PARSER_STATE_EXPECT_KEY_START;
+            node->parser_state = EXPECT_KEY_START;
             
             if ((key == NULL) || is_get_root) {
                 node->ksync = 0;
                 node->kind = 0;
-                node->type = JSONIC_NODE_TYPE_OBJECT;
+                node->type = OBJECT;
                 node->plevel++;
                 node->ind++;
                 return node;
             }
         } else if (c == '[') {
             node->clevel = (node->plevel++ == 0) ? 1: node->clevel;
-            node->parser_state = JSONIC_PARSER_STATE_EXPECT_ARR_END;
+            node->parser_state = EXPECT_ARR_END;
 
             if (is_get_root) {
-                node->type = JSONIC_NODE_TYPE_ARRAY;
+                node->type = ARRAY;
                 node->ksync = 0;
                 node->kind = 0;
                 node->arrind = 0;
@@ -321,20 +342,20 @@ extern jsonic_node_t* jsonic_get(
             }
         } else {
             if (key != NULL) {
-                jsonic_free(&node);
-                return NULL;
+                node->type = NONE;
+                return node;
             }
 
             if (c == '"') {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_VAL_END;
-                node->type = JSONIC_NODE_TYPE_STRING;
+                node->parser_state = EXPECT_VAL_END;
+                node->type = STRING;
                 node->val = malloc(1);
                 *node->val = '\0';
                 node->len = 0;
                 node->ksync = 1;
             } else if ((c == '-') || ((c > 47) && (c < 58))) {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_NUMVAL;
-                node->type = JSONIC_NODE_TYPE_NUMBER;
+                node->parser_state = EXPECT_NUMVAL;
+                node->type = NUMBER;
                 node->val = malloc(2);
                 *node->val = c;
                 node->val[1] = '\0';
@@ -342,8 +363,8 @@ extern jsonic_node_t* jsonic_get(
             } else if (
                 (c == 't') || (c == 'T')
             ) {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_BOOLVAL;
-                node->type = JSONIC_NODE_TYPE_BOOLEAN;
+                node->parser_state = EXPECT_BOOLVAL;
+                node->type = BOOLEAN;
                 
                 node->len = 1;
                 node->val = malloc(2);
@@ -354,8 +375,8 @@ extern jsonic_node_t* jsonic_get(
             } else if (
                 (c == 'f') || (c == 'F')
             ) {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_BOOLVAL;
-                node->type = JSONIC_NODE_TYPE_BOOLEAN;
+                node->parser_state = EXPECT_BOOLVAL;
+                node->type = BOOLEAN;
                 
                 node->len = 1;
                 node->val = malloc(2);
@@ -366,8 +387,8 @@ extern jsonic_node_t* jsonic_get(
             } else if (
                 (c == 'n') || (c == 'N')
             ) {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_NULLVAL;
-                node->type = JSONIC_NODE_TYPE_NULL;
+                node->parser_state = EXPECT_NULLVAL;
+                node->type = NULLVAL;
                 
                 node->len = 1;
                 node->val = malloc(2);
@@ -377,10 +398,10 @@ extern jsonic_node_t* jsonic_get(
                 return node;
             }
         }
-    } else if (node->parser_state == JSONIC_PARSER_STATE_EXPECT_NUMVAL) {
-        if (node->ksync) {
+    } else if (node->parser_state == EXPECT_NUMVAL) {
+        if (node->ksync || is_kv_iter) {
             if (!((c > 47) && (c < 58)) && (c != '.')) {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_KEY_START;
+                node->parser_state = EXPECT_KEY_START;
                 return node;
             }
 
@@ -394,23 +415,23 @@ extern jsonic_node_t* jsonic_get(
         } else {
             if (((c > 47) && (c < 58)) || (c == '.')) {
             } else if (c =='}') {
-                jsonic_free(&node);
-                return NULL;
+                node->type = NONE;
+                return node;
             } else {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_KEY_START;
+                node->parser_state = EXPECT_KEY_START;
             }
         }
-    } else if (node->parser_state == JSONIC_PARSER_STATE_EXPECT_VAL_END) {
+    } else if (node->parser_state == EXPECT_VAL_END) {
         if ((c == '"') && (node->meta == 0)) {
-            node->parser_state = JSONIC_PARSER_STATE_EXPECT_KEY_START;
+            node->parser_state = EXPECT_KEY_START;
             
-            if (node->ksync) {
+            if (node->ksync || is_kv_iter) {
                 if (node->clevel == node->plevel) {
                     node->ind++;
                     return node;
                 }
             }
-        } else if (node->ksync) {
+        } else if (node->ksync || is_kv_iter) {
             char* v = node->val;
             node->val = malloc(1*(node->len+2));
             strcpy(node->val, v);
@@ -419,46 +440,60 @@ extern jsonic_node_t* jsonic_get(
             node->val[node->len+1] = '\0';
             node->len++;
         }
-    } else if (node->parser_state == JSONIC_PARSER_STATE_EXPECT_KEY_START) {
+    } else if (node->parser_state == EXPECT_KEY_START) {
         if (node->plevel == 0) {
-            jsonic_free(&node);
-            return NULL;
+            node->type = NONE;
+            return node;
         }
 
         if (c == '"') {
-            node->pos++;
+            if (!is_key_itered) {
+                is_key_itered = 1;
+            } else {
+                node->pos++;
+            }
+
             node->ksync = 1;
             node->kind = 0;
-            node->parser_state = JSONIC_PARSER_STATE_EXPECT_KEY_END;
+            node->parser_state = EXPECT_KEY_END;
+
+            if (is_kv_iter) {
+                node->key = malloc(1);
+                *node->key = '\0';
+            }
         } else if (c == '}') {
-            jsonic_free(&node);
-            return NULL;
+            node->type = NONE;
+            return node;
         }
-    } else if (node->parser_state == JSONIC_PARSER_STATE_EXPECT_KEY_END) {
+    } else if (node->parser_state == EXPECT_KEY_END) {
         if (c == '"') {
             if (keylen != node->kind) {
                 node->ksync = 0;
             }
 
             node->kind = 0;
-            node->parser_state = JSONIC_PARSER_STATE_EXPECT_VAL_START;
+            node->parser_state = EXPECT_VAL_START;
 
             node->ind++;
             goto next;
         }
 
-        if (node->ksync == 0) {
+        if (!node->ksync && !is_kv_iter) {
             node->ind++;
             node->kind++;
             goto next;
         }
         
         if (
-            (keylen == 0)
-            ||
-            (keylen <= node->kind)
-            ||
-            (c != key[node->kind])
+            !is_kv_iter
+            &&
+            (
+                (keylen == 0)
+                ||
+                (keylen <= node->kind)
+                ||
+                (c != key[node->kind])
+            )
         ) {
             node->ksync = 0;
             node->ind++;
@@ -466,35 +501,44 @@ extern jsonic_node_t* jsonic_get(
             goto next;
         }
 
+        if (is_kv_iter) {
+            char* tmp = node->key;
+            node->key = malloc(node->kind+2);
+            strcpy(node->key, tmp);
+            free(tmp);
+            node->key[node->kind] = c;
+            node->key[node->kind+1] = '\0';
+        }
+
         node->kind++;
-    } else if (node->parser_state == JSONIC_PARSER_STATE_EXPECT_VAL_START) {
-        if (node->ksync) {
+    } else if (node->parser_state == EXPECT_VAL_START) {
+        if (node->ksync || is_kv_iter) {
             if (c == '{') {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_KEY_START;
+                node->parser_state = EXPECT_KEY_START;
                 node->ksync = 0;
                 node->kind = 0;
-                node->type = JSONIC_NODE_TYPE_OBJECT;
+                node->type = OBJECT;
                 node->plevel++;
                 node->ind++;
                 
                 return node;
             } else if (c == '[') {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_ARR_END;
-                node->type = JSONIC_NODE_TYPE_ARRAY;
+                node->parser_state = EXPECT_ARR_END;
+                node->type = ARRAY;
                 node->ksync = 0;
                 node->kind = 0;
                 node->arrind = 0;
                 node->plevel++;
                 node->ind++;
-                
+
                 return node;
             }
             
             if (
                 (c == 't') || (c == 'T')
             ) {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_KEY_START;
-                node->type = JSONIC_NODE_TYPE_BOOLEAN;
+                node->parser_state = EXPECT_KEY_START;
+                node->type = BOOLEAN;
                 
                 node->len = 1;
                 node->val = malloc(2);
@@ -505,8 +549,8 @@ extern jsonic_node_t* jsonic_get(
             } else if (
                 (c == 'f') || (c == 'F')
             ) {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_KEY_START;
-                node->type = JSONIC_NODE_TYPE_BOOLEAN;
+                node->parser_state = EXPECT_KEY_START;
+                node->type = BOOLEAN;
                 
                 node->len = 1;
                 node->val = malloc(2);
@@ -519,8 +563,8 @@ extern jsonic_node_t* jsonic_get(
             if (
                 (c == 'n') || (c == 'N')
             ) {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_KEY_START;
-                node->type = JSONIC_NODE_TYPE_NULL;
+                node->parser_state = EXPECT_KEY_START;
+                node->type = NULLVAL;
                 
                 node->len = 1;
                 node->val = malloc(2);
@@ -531,49 +575,49 @@ extern jsonic_node_t* jsonic_get(
             }
             
             if ((c == '-') || ((c > 47) && (c < 58))) {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_NUMVAL;
-                node->type = JSONIC_NODE_TYPE_NUMBER;
+                node->parser_state = EXPECT_NUMVAL;
+                node->type = NUMBER;
                 node->val = malloc(2);
                 *node->val = c;
                 *(node->val+1) = '\0';
             } else if (c == '"') {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_VAL_END;
-                node->type = JSONIC_NODE_TYPE_STRING;
+                node->parser_state = EXPECT_VAL_END;
+                node->type = STRING;
                 node->val = malloc(1);
                 *node->val = '\0';
                 node->len = 0;
             }
         } else {
             if ((c == '-') || ((c > 47) && (c < 58))) {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_NUMVAL;
+                node->parser_state = EXPECT_NUMVAL;
             } else if (c == '"') {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_VAL_END;
+                node->parser_state = EXPECT_VAL_END;
             } else if (c =='{') {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_KEY_START;
+                node->parser_state = EXPECT_KEY_START;
                 node->plevel++;
             } else if (c == '[') {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_KEY_START;
+                node->parser_state = EXPECT_KEY_START;
                 node->plevel++;
             } else if (
                 (c == 't') || (c == 'T')
             ) {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_BOOLVAL;
+                node->parser_state = EXPECT_BOOLVAL;
             } else if (
                 (c == 'f') || (c == 'F')
             ) {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_BOOLVAL;
+                node->parser_state = EXPECT_BOOLVAL;
             } else if (
                 (c == 'n') || (c == 'N')
             ) {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_NULLVAL;
+                node->parser_state = EXPECT_NULLVAL;
             }
         }
-    } else if (node->parser_state == JSONIC_PARSER_STATE_EXPECT_ARR_END) {
+    } else if (node->parser_state == EXPECT_ARR_END) {
         if (
             (c == 't') || (c == 'T')
         ) {
             if (node->arrind == index) {
-                node->type = JSONIC_NODE_TYPE_BOOLEAN;
+                node->type = BOOLEAN;
                 node->len = 1;
                 node->val = malloc(2);
                 *node->val = '1';
@@ -582,12 +626,12 @@ extern jsonic_node_t* jsonic_get(
                 return node;
             }
             
-            node->parser_state = JSONIC_PARSER_STATE_EXPECT_ARR_BOOLVAL;
+            node->parser_state = EXPECT_ARR_BOOLVAL;
         } else if (
             (c == 'f') || (c == 'F')
         ) {
             if (node->arrind == index) {
-                node->type = JSONIC_NODE_TYPE_BOOLEAN;
+                node->type = BOOLEAN;
                 node->len = 1;
                 node->val = malloc(2);
                 *node->val = '0';
@@ -596,14 +640,14 @@ extern jsonic_node_t* jsonic_get(
                 return node;
             }
             
-            node->parser_state = JSONIC_PARSER_STATE_EXPECT_ARR_BOOLVAL;
+            node->parser_state = EXPECT_ARR_BOOLVAL;
         }
 
         if (
             (c == 'n') || (c == 'N')
         ) {
             if (node->arrind == index) {
-                node->type = JSONIC_NODE_TYPE_NULL;
+                node->type = NULLVAL;
                 node->len = 1;
                 node->val = malloc(2);
                 *node->val = '0';
@@ -612,20 +656,20 @@ extern jsonic_node_t* jsonic_get(
                 return node;
             }
             
-            node->parser_state = JSONIC_PARSER_STATE_EXPECT_ARR_NULLVAL;
+            node->parser_state = EXPECT_ARR_NULLVAL;
         }
         
         if ((c == '-') || ((c > 47) && (c < 58))) {
-            node->parser_state = JSONIC_PARSER_STATE_EXPECT_ARR_NUMVAL;
+            node->parser_state = EXPECT_ARR_NUMVAL;
             
             if (node->arrind == index) {
-                node->type = JSONIC_NODE_TYPE_NUMBER;
+                node->type = NUMBER;
                 node->val = malloc(2);
                 *node->val = c;
                 *(node->val+1) = '\0';
             }
         } else if (c == '"') {
-            node->parser_state = JSONIC_PARSER_STATE_EXPECT_ARR_STR_END;
+            node->parser_state = EXPECT_ARR_STR_END;
             node->val = malloc(1);
             *node->val = '\0';
             node->len = 0;
@@ -633,21 +677,21 @@ extern jsonic_node_t* jsonic_get(
             node->pos++;
             node->arrind++;
         } else if (c == ']') {
-            jsonic_free(&node);
-            return NULL;
+            node->type = NONE;
+            return node;
         } else if (node->arrind == index) {
             if (c == '{') {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_KEY_START;
+                node->parser_state = EXPECT_KEY_START;
                 node->ksync = 0;
                 node->kind = 0;
-                node->type = JSONIC_NODE_TYPE_OBJECT;
+                node->type = OBJECT;
                 node->plevel++;
                 node->ind++;
                 
                 return node;
             } else if (c == '[') {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_ARR_END;
-                node->type = JSONIC_NODE_TYPE_ARRAY;
+                node->parser_state = EXPECT_ARR_END;
+                node->type = ARRAY;
                 node->ksync = 0;
                 node->kind = 0;
                 node->arrind = 0;
@@ -663,13 +707,13 @@ extern jsonic_node_t* jsonic_get(
                 node->plevel++;
             }
         }
-    } else if (node->parser_state == JSONIC_PARSER_STATE_EXPECT_ARR_STR_END) {
+    } else if (node->parser_state == EXPECT_ARR_STR_END) {
         if ((c == '"') && (node->meta == 0)) {
-            node->parser_state = JSONIC_PARSER_STATE_EXPECT_ARR_END;
+            node->parser_state = EXPECT_ARR_END;
             
             if (node->arrind == index) {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_ARR_END;
-                node->type = JSONIC_NODE_TYPE_STRING;
+                node->parser_state = EXPECT_ARR_END;
+                node->type = STRING;
                 node->ind++;
                 return node;
             }
@@ -682,10 +726,10 @@ extern jsonic_node_t* jsonic_get(
             node->val[node->len+1] = '\0';
             node->len++;
         }
-    } else if (node->parser_state == JSONIC_PARSER_STATE_EXPECT_ARR_NUMVAL) {
+    } else if (node->parser_state == EXPECT_ARR_NUMVAL) {
         if (node->arrind == index) {
             if (!((c > 47) && (c < 58)) && (c != '.')) {
-                node->parser_state = JSONIC_PARSER_STATE_EXPECT_ARR_END;
+                node->parser_state = EXPECT_ARR_END;
                 return node;
             }
 
@@ -697,48 +741,48 @@ extern jsonic_node_t* jsonic_get(
             node->val[len] = c;
             node->val[len+1] = '\0';
         } if (c ==']') {
-            jsonic_free(&node);
-            return NULL;
+            node->type = NONE;
+            return node;
         } else if (c == ',') {
             node->pos++;
             node->arrind++;
-            node->parser_state = JSONIC_PARSER_STATE_EXPECT_ARR_END;
+            node->parser_state = EXPECT_ARR_END;
         }
-    } else if (node->parser_state == JSONIC_PARSER_STATE_EXPECT_BOOLVAL) {
+    } else if (node->parser_state == EXPECT_BOOLVAL) {
         if (is_bool_char(c)) {
         } else {
-            node->parser_state = JSONIC_PARSER_STATE_EXPECT_KEY_START;
+            node->parser_state = EXPECT_KEY_START;
         }
-    } else if (node->parser_state == JSONIC_PARSER_STATE_EXPECT_ARR_BOOLVAL) {
+    } else if (node->parser_state == EXPECT_ARR_BOOLVAL) {
         if (is_bool_char(c)) {
         } else if (c == ']') {
-            jsonic_free(&node);
-            return NULL;
+            node->type = NONE;
+            return node;
         } else {
             if (c == ',') {
                 node->pos++;
                 node->arrind++;
             }
             
-            node->parser_state = JSONIC_PARSER_STATE_EXPECT_ARR_END;
+            node->parser_state = EXPECT_ARR_END;
         }
-    } else if (node->parser_state == JSONIC_PARSER_STATE_EXPECT_NULLVAL) {
+    } else if (node->parser_state == EXPECT_NULLVAL) {
         if (is_null_char(c)) {
         } else {
-            node->parser_state = JSONIC_PARSER_STATE_EXPECT_KEY_START;
+            node->parser_state = EXPECT_KEY_START;
         }
-    } else if (node->parser_state == JSONIC_PARSER_STATE_EXPECT_ARR_NULLVAL) {
+    } else if (node->parser_state == EXPECT_ARR_NULLVAL) {
         if (is_null_char(c)) {
         } else if (c == ']') {
-            jsonic_free(&node);
-            return NULL;
+            node->type = NONE;
+            return node;
         } else {
             if (c == ',') {
                 node->pos++;
                 node->arrind++;
             }
             
-            node->parser_state = JSONIC_PARSER_STATE_EXPECT_ARR_END;
+            node->parser_state = EXPECT_ARR_END;
         }
     }
 
@@ -749,8 +793,9 @@ extern jsonic_node_t* jsonic_get(
 
     end:
 
+    node->type = NONE;
 
-    return (node->type == JSONIC_NODE_TYPE_NONE) ? NULL: node;
+    return node;
 }
 
 int is_bool_char(char c) {
