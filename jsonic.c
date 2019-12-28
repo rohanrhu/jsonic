@@ -406,10 +406,7 @@ extern jsonic_node_t* jsonic_get(
             }
 
             int len = strlen(node->val);
-            char* v = node->val;
-            node->val = malloc(1*(len+2));
-            strcpy(node->val, v);
-            free(v);
+            node->val = realloc(node->val, len+2);
             node->val[len] = c;
             node->val[len+1] = '\0';
         } else {
@@ -432,10 +429,7 @@ extern jsonic_node_t* jsonic_get(
                 }
             }
         } else if (node->ksync || is_kv_iter) {
-            char* v = node->val;
-            node->val = malloc(1*(node->len+2));
-            strcpy(node->val, v);
-            free(v);
+            node->val = realloc(node->val, node->len+2);
             node->val[node->len] = c;
             node->val[node->len+1] = '\0';
             node->len++;
@@ -502,10 +496,7 @@ extern jsonic_node_t* jsonic_get(
         }
 
         if (is_kv_iter) {
-            char* tmp = node->key;
-            node->key = malloc(node->kind+2);
-            strcpy(node->key, tmp);
-            free(tmp);
+            node->key = realloc(node->key, node->kind+2);
             node->key[node->kind] = c;
             node->key[node->kind+1] = '\0';
         }
@@ -718,10 +709,7 @@ extern jsonic_node_t* jsonic_get(
                 return node;
             }
         } else if (node->arrind == index) {
-            char* v = node->val;
-            node->val = malloc(1*(node->len+2));
-            strcpy(node->val, v);
-            free(v);
+            node->val = realloc(node->val, node->len+2);
             node->val[node->len] = c;
             node->val[node->len+1] = '\0';
             node->len++;
@@ -734,10 +722,7 @@ extern jsonic_node_t* jsonic_get(
             }
 
             int len = strlen(node->val);
-            char* v = node->val;
-            node->val = malloc(1*(len+2));
-            strcpy(node->val, v);
-            free(v);
+            node->val = realloc(node->val, len+2);
             node->val[len] = c;
             node->val[len+1] = '\0';
         } if (c ==']') {

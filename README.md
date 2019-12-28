@@ -21,7 +21,7 @@ gcc -o example.exe example.c /path/to/jsonic/jsonic.o -I /path/to/jsonic
 
 ## Reading JSON
 
-### jsonic node
+### Jsonic Node
 Every JSON result is a `jsonic_node_t` object in jsonic.
 
 ```c
@@ -81,7 +81,7 @@ typedef enum JSONIC_NODE_TYPES jsonic_node_type_t;
 You will get a node with type `NONE` for not found results and of course you need freeing it.
 
 ##### Checking Length for Not Found Results
-You can check how many items itered at total including searching the not found result node.
+You can check how many items itered at total including searching the not found result node with `node->pos`.
 
 ###### Examples
 ```c
@@ -95,6 +95,16 @@ jsonic_node_t* not_exists_key = jsonic_object_iter(json_string, root, an_exists_
 
 // not_exists_key->pos+1 is how many items itered at total including an_exists_key.
 printf("Count: %d\n\n", not_exists_key->pos);
+```
+
+```c
+jsonic_node_t* not_exists_item = jsonic_array_get(json_string, array, 100);
+printf("Count: %d\n\n", not_exists_item->pos); // not_exists_item->pos+1 is how many items itered.
+```
+
+```c
+jsonic_node_t* not_exists_item = jsonic_array_iter(json_string, array, exists_item, 100);
+printf("Count: %d\n\n", not_exists_item->pos); // not_exists_item->pos+1 is how many items itered at total.
 ```
 
 ### Functions

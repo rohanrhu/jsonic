@@ -24,7 +24,11 @@ int main() {
     jsonic_node_t* keys = jsonic_object_get(json_string, root, "keys");
 
     jsonic_node_t* not_exists_key = jsonic_object_get(json_string, root, "not_exists_key");
-    printf("Count: %d\n\n", not_exists_key->pos);
+    printf("Key Count: %d (keys itered at total)\n", not_exists_key->pos+1);
+
+    jsonic_node_t* arr = jsonic_object_iter(json_string, root, keys, "arr");
+    jsonic_node_t* not_exists_item = jsonic_array_iter(json_string, arr, NULL, 100);
+    printf("Item Count: %d (items itered at total)\n\n", not_exists_item->pos+1);
 
     printf("Key Value Pairs\n");
 
