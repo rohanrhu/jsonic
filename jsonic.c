@@ -360,6 +360,7 @@ extern jsonic_node_t* jsonic_get(
                 *node->val = c;
                 node->val[1] = '\0';
                 node->ksync = 1;
+                node->len = 1;
             } else if (
                 (c == 't') || (c == 'T')
             ) {
@@ -405,10 +406,10 @@ extern jsonic_node_t* jsonic_get(
                 return node;
             }
 
-            int len = strlen(node->val);
-            node->val = realloc(node->val, len+2);
-            node->val[len] = c;
-            node->val[len+1] = '\0';
+            node->val = realloc(node->val, node->len+2);
+            node->val[node->len] = c;
+            node->val[node->len+1] = '\0';
+            node->len++;
         } else {
             if (((c > 47) && (c < 58)) || (c == '.')) {
             } else if (c =='}') {
@@ -571,6 +572,7 @@ extern jsonic_node_t* jsonic_get(
                 node->val = malloc(2);
                 *node->val = c;
                 *(node->val+1) = '\0';
+                node->len = 1;
             } else if (c == '"') {
                 node->parser_state = EXPECT_VAL_END;
                 node->type = STRING;
@@ -658,6 +660,7 @@ extern jsonic_node_t* jsonic_get(
                 node->val = malloc(2);
                 *node->val = c;
                 *(node->val+1) = '\0';
+                node->len = 1;
             }
         } else if (c == '"') {
             node->parser_state = EXPECT_ARR_STR_END;
@@ -721,10 +724,10 @@ extern jsonic_node_t* jsonic_get(
                 return node;
             }
 
-            int len = strlen(node->val);
-            node->val = realloc(node->val, len+2);
-            node->val[len] = c;
-            node->val[len+1] = '\0';
+            node->val = realloc(node->val, node->len+2);
+            node->val[node->len] = c;
+            node->val[node->len+1] = '\0';
+            node->len++;
         } if (c ==']') {
             node->type = NONE;
             return node;
