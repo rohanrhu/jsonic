@@ -16,16 +16,33 @@
 #include "jsonic.h"
 
 extern char* jsonic_from_file(char* fname) {
-    char* json_string;
+    char* json_string = NULL;
 
     FILE *fd;
     fd = fopen(fname,"r");
-    fseek(fd, 0, SEEK_END);
-    int flen = ftell(fd);
-    fseek(fd, 0, SEEK_SET);
-    json_string = malloc(1*flen);
-    fread(json_string, 1, flen, fd);
-    fclose(fd);
+    //Handle file errors.
+    if (fd != NULL)
+    {
+        fseek(fd, 0, SEEK_END);
+        int flen = ftell(fd);
+        fseek(fd, 0, SEEK_SET);
+    }
+    
+    //Doesn't handle null term for json_string char* string.
+    //Leads to errnoneous string endings with garbage data, and depending on platform can lead to segfaults.
+    //json_string = malloc(1*flen);
+    //
+    //No error checking on memory allocation.
+    //fread(json_string, 1, flen, fd);
+    //fclose(fd);
+    if (fd != NULL)
+    json_string = calloc(flen + 1, sizeof(char)); //Calloc sets allocated mem bytes to 0. flen+1 for null term.
+    //Check for memory allocation error.
+    if (json_string != NULL)
+    {
+        fread(json_string, 1, flen, fd);
+        fclose(fd);
+    }
 
     return json_string;
 }
