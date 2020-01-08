@@ -35,9 +35,9 @@ int main() {
     jsonic_node_t* key = NULL;
     for (;;) {
         key = jsonic_object_iter_kv_free(json_string, keys, key);
-        if (key->type == NONE) break;
+        if (key->type == JSONIC_NONE) break;
         
-        if ((key->type == STRING) || (key->type == NUMBER)) {
+        if ((key->type == JSONIC_STRING) || (key->type == JSONIC_NUMBER)) {
             printf("  %s => %s\n", key->key, key->val);
         }
     }

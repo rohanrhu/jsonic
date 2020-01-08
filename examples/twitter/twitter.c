@@ -35,7 +35,7 @@ int main() {
     jsonic_node_t* status = NULL;
     for (;;) {
         status = jsonic_array_iter_free(json_string, statuses, status, 0);
-        if (status->type == NONE) break;
+        if (status->type == JSONIC_NONE) break;
 
         id = jsonic_object_get(json_string, status, "id");
 

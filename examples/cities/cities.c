@@ -42,7 +42,7 @@ int main() {
 
     for (;;) {
         feature = jsonic_array_iter_free(json_string, features, feature, 0);
-        if (feature->type == NONE) break;
+        if (feature->type == JSONIC_NONE) break;
 
         properties = jsonic_object_get(json_string, feature, "properties");
         geometry = jsonic_object_iter(json_string, feature, properties, "geometry");
@@ -51,7 +51,7 @@ int main() {
         coordinate = jsonic_array_get(json_string, coordinates, 0);
         coordinate0 = jsonic_array_get(json_string, coordinate, 0);
 
-        // if ((x = jsonic_array_get(json_string, coordinate0, 0))->type == NUMBER) {
+        // if ((x = jsonic_array_get(json_string, coordinate0, 0))->type == JSONIC_NUMBER) {
         //     y = jsonic_array_iter(json_string, coordinate0, x, 0);
         //     printf("MAPBLKLOT: %s, X: %s, Y: %s\n", MAPBLKLOT->val, x->val, y ? y->val: "(NONE)");
         // } else {

@@ -16,6 +16,11 @@
 
 int main() {
     char* json_string = jsonic_from_file("heroes.json");
+
+    if (json_string == NULL) {
+        printf("JSON file not found.\n");
+        exit(0);
+    }
     
     struct timeval t0, t1;
     gettimeofday(&t0, NULL);
@@ -39,9 +44,9 @@ int main() {
     jsonic_node_t* power = NULL;
     for (;;) {
         power = jsonic_array_iter_free(json_string, powers, power, 0);
-        if (power->type == NONE) break;
+        if (power->type == JSONIC_NONE) break;
         
-        if (power->type == STRING) {
+        if (power->type == JSONIC_STRING) {
             printf(
                 "\t%s (pos: %d, from len: %d)\n",
                 power->val,

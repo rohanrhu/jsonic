@@ -44,16 +44,16 @@ You will use structure members: `type`, `key`, `val`, `len` and `pos` for readin
 `key` is useable NULL Terminated String for Key=>Value iteration results.
 
 #### String Values
-String values come as NULL Terminated String in `val` and you can check them with `node->type == STRING`.
+String values come as NULL Terminated String in `val` and you can check them with `node->type == JSONIC_STRING`.
 
 #### Number Values
-Number values come as NULL Terminated String in `val` and you can check them with `node->type == NUMBER`.
+Number values come as NULL Terminated String in `val` and you can check them with `node->type == JSONIC_NUMBER`.
 
 #### Boolean Values
-Boolean values come as NULL Terminated String in `val`. `val` maybe `"1"` or `"0"` for boolean values and you can check them with `node->type == BOOLEAN`.
+Boolean values come as NULL Terminated String in `val`. `val` maybe `"1"` or `"0"` for boolean values and you can check them with `node->type == JSONIC_BOOLEAN`.
 
 #### Null Values
-Null values come as NULL Terminated String in `val` as `"0"` and you can check them with `node->type == NULLVAL`.
+Null values come as NULL Terminated String in `val` as `"0"` and you can check them with `node->type == JSONIC_NULL`.
 
 #### Result Length
 `len` is useable for **string**, **number**, **boolean** and **null** types and does not give length of an **array**.
@@ -66,19 +66,19 @@ Also you can use it for not found result nodes.
 ### JSON Types
 ```c
 enum JSONIC_NODE_TYPES {
-    NONE,
-    OBJECT,
-    ARRAY,
-    STRING,
-    NUMBER,
-    BOOLEAN,
-    NULLVAL
+    JSONIC_NONE,
+    JSONIC_OBJECT,
+    JSONIC_ARRAY,
+    JSONIC_STRING,
+    JSONIC_NUMBER,
+    JSONIC_BOOLEAN,
+    JSONIC_NULL
 };
 typedef enum JSONIC_NODE_TYPES jsonic_node_type_t;
 ```
 
 #### Not Found Results
-You will get a node with type `NONE` for not found results and of course you need freeing it.
+You will get a node with type `JSONIC_NONE` for not found results and of course you need freeing it.
 
 ##### Checking Length for Not Found Results
 You can check how many items itered at total including searching the not found result node with `node->pos`.
@@ -142,19 +142,19 @@ jsonic_node_t* jsonic_get_root(char* json_str);
 ```c
 jsonic_node_t* root = jsonic_get_root(json_string);
 
-if (root->type == NONE) {
+if (root->type == JSONIC_NONE) {
     printf("JSON root is none.\n");
-} else if (root->type == OBJECT) {
+} else if (root->type == JSONIC_OBJECT) {
     printf("JSON root is an object.\n");
-} else if (root->type == ARRAY) {
+} else if (root->type == JSONIC_ARRAY) {
     printf("JSON root is an array.\n");
-} else if (root->type == STRING) {
+} else if (root->type == JSONIC_STRING) {
     printf("JSON root is a string.\n");
-} else if (root->type == NUMBER) {
+} else if (root->type == JSONIC_NUMBER) {
     printf("JSON root is a number.\n");
-} else if (root->type == BOOLEAN) {
+} else if (root->type == JSONIC_BOOLEAN) {
     printf("JSON root is a boolean.\n");
-} else if (root->type == NULLVAL) {
+} else if (root->type == JSONIC_NULL) {
     printf("JSON root is null.\n");
 }
 ```
@@ -215,7 +215,7 @@ jsonic_node_t* root = jsonic_get_root(json_string);
 jsonic_node_t* name = jsonic_object_get(json_string, root, "squadName");
 
 if (name != NULL) {
-    if (name->type == STRING) {
+    if (name->type == JSONIC_STRING) {
         printf("Squad: %s\n", name->val);
     }
 
@@ -255,7 +255,7 @@ You can use `jsonic_array_iter()` or `jsonic_array_iter_free()`.
 jsonic_node_t* power = NULL;
 for (;;) {
     power = jsonic_array_iter_free(json_string, powers, power, 0);
-    if (power->type == NONE) break;
+    if (power->type == JSONIC_NONE) break;
 }
 ```
 
@@ -303,9 +303,9 @@ You can use `jsonic_object_iter_kv()` or `jsonic_object_iter_kv_free()`.
 jsonic_node_t* key = NULL;
 for (;;) {
     key = jsonic_object_iter_kv_free(json_string, keys, key);
-    if (key->type == NONE) break;
+    if (key->type == JSONIC_NONE) break;
     
-    if ((key->type == STRING) || (key->type == NUMBER)) {
+    if ((key->type == JSONIC_STRING) || (key->type == JSONIC_NUMBER)) {
         printf("%s => %s\n", key->key, key->val);
     }
 }
@@ -351,9 +351,9 @@ printf("Powers (%d total):\n", jsonic_array_length(json_string, powers));
 jsonic_node_t* power = NULL;
 for (;;) {
     power = jsonic_array_iter_free(json_string, powers, power, 0);
-    if (power->type == NONE) break;
+    if (power->type == JSONIC_NONE) break;
     
-    if (power->type == STRING) {
+    if (power->type == JSONIC_STRING) {
         printf(
             "\t%s (pos: %d, from len: %d)\n",
             power->val,
