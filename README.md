@@ -1,16 +1,18 @@
 # jsonic
+
 JSON parser for C.
 
 ## Including and Compiling
 
 ### Including
+
 ```c
 #include "jsonic.h"
 ```
 
-### Compiling
+### Building
 
-###### GNU Compiler Collection (GCC)
+#### GNU Compiler Collection (GCC)
 
 ```bash
 cd /path/to/jsonic
@@ -22,6 +24,7 @@ gcc -o example.exe example.c /path/to/jsonic/jsonic.o -I /path/to/jsonic
 ## Reading JSON
 
 ### Jsonic Node
+
 Every JSON result is a `jsonic_node_t` object in jsonic.
 
 ```c
@@ -44,26 +47,33 @@ You will use structure members: `type`, `key`, `val`, `len` and `pos` for readin
 `key` is useable NULL Terminated String for Key=>Value iteration results.
 
 #### String Values
+
 String values come as NULL Terminated String in `val` and you can check them with `node->type == JSONIC_STRING`.
 
 #### Number Values
+
 Number values come as NULL Terminated String in `val` and you can check them with `node->type == JSONIC_NUMBER`.
 
 #### Boolean Values
+
 Boolean values come as NULL Terminated String in `val`. `val` maybe `"1"` or `"0"` for boolean values and you can check them with `node->type == JSONIC_BOOLEAN`.
 
 #### Null Values
+
 Null values come as NULL Terminated String in `val` as `"0"` and you can check them with `node->type == JSONIC_NULL`.
 
 #### Result Length
+
 `len` is useable for **string**, **number**, **boolean** and **null** types and does not give length of an **array**.
 You can use [jsonic_array_length()](#jsonic_array_length) or [jsonic_array_length_from()](#jsonic_array_length_from) for getting an array's length.
 
 #### Iteration Position
+
 `node->pos` is useable for objects and arrays both. It gives current index of current iterated array item or object key&value.
 Also you can use it for not found result nodes.
 
 ### JSON Types
+
 ```c
 enum JSONIC_NODE_TYPES {
     JSONIC_NONE,
@@ -78,12 +88,15 @@ typedef enum JSONIC_NODE_TYPES jsonic_node_type_t;
 ```
 
 #### Not Found Results
+
 You will get a node with type `JSONIC_NONE` for not found results and of course you need freeing it.
 
 ##### Checking Length for Not Found Results
+
 You can check how many items itered at total including searching the not found result node with `node->pos`.
 
 ###### Examples
+
 ```c
 jsonic_node_t* not_exists_key = jsonic_object_get(json_string, root, "not_exists_key");
 printf("Count: %d\n\n", not_exists_key->pos); // not_exists_key->pos+1 is how many items itered.
@@ -108,17 +121,21 @@ printf("Count: %d\n\n", not_exists_item->pos); // not_exists_item->pos+1 is how 
 ```
 
 ### Functions
+
 There are various functions in Jsonic for walking and iterating on JSON.
 
 #### jsonic_from_file()
+
 ```c
 char* jsonic_from_file(char* fname);
 ```
 
 #### jsonic_free()
+
 ```c
 void jsonic_free(jsonic_node_t** node);
 ```
+
 Example:
 
 ```c
@@ -128,11 +145,13 @@ jsonic_free(&members); // free'd and members is set to NULL
 ```
 
 #### jsonic_free_addr()
+
 ```c
 void jsonic_free_addr(jsonic_node_t* node);
 ```
 
 #### jsonic_get_root()
+
 ```c
 jsonic_node_t* jsonic_get_root(char* json_str);
 ```
@@ -160,37 +179,49 @@ if (root->type == JSONIC_NONE) {
 ```
 
 #### jsonic_object_get()
+
 ```c
 jsonic_node_t* jsonic_object_get(char* json_str, jsonic_node_t* current, char* key);
 ```
 
 ##### Get an Object Key
+
 Get a key from JSON root:
+
 ```c
 jsonic_object_get(json_string, jsonic_get_root(json_string), "someKey");
 ```
+
 or find an existing node:
+
 ```c
 jsonic_object_get(json_string, some_object, "someKey");
 ```
 
 #### jsonic_array_get()
+
 ```c
 jsonic_node_t* jsonic_array_get(char* json_str, jsonic_node_t* current, int index);
 ```
 
 ##### Get an Element of Array
+
 Get an array element from JSON Array root:
+
 ```c
 jsonic_array_get(json_string, jsonic_get_root(json_string), 5);
 ```
+
 or find an existing node:
+
 ```c
 jsonic_array_get(json_string, some_array, 5);
 ```
 
 ##### Inline Usage
+
 If you are using these functions as inline, application will have memory leaks and it will be non-memory-safe, so you may get `SIGSEGV`!
+
 ```c
 extern jsonic_node_t* jsonic_get_root(char* json_str);
 extern jsonic_node_t* jsonic_object_get(char* json_str, jsonic_node_t* current, char* key);
@@ -203,13 +234,16 @@ extern jsonic_node_t* jsonic_array_iter(char* json_str, jsonic_node_t* current, 
 extern jsonic_node_t* jsonic_array_iter_free(char* json_str, jsonic_node_t* current, jsonic_node_t* node, int index);
 ```
 
-###### Example
+###### Memory-Safety Example
+
 Non-memory-safe usage:
+
 ```c
 printf("Squad: %s\n", jsonic_object_get(json_string, jsonic_get_root(json_string), "squadName")->val);
 ```
 
 This is memory-safe usage:
+
 ```c
 jsonic_node_t* root = jsonic_get_root(json_string);
 jsonic_node_t* name = jsonic_object_get(json_string, root, "squadName");
@@ -226,16 +260,19 @@ jsonic_free(&root);
 ```
 
 #### jsonic_array_length()
+
 ```c
 int jsonic_array_length(char* json_str, jsonic_node_t* array);
 ```
 
 #### jsonic_array_length_from()
+
 ```c
 int jsonic_array_length_from(char* json_str, jsonic_node_t* array, jsonic_node_t* from);
 ```
 
 #### jsonic_array_iter()
+
 ```c
 jsonic_node_t* jsonic_array_iter(char* json_str, jsonic_node_t* current, jsonic_node_t* node, int index);
 ```
@@ -243,6 +280,7 @@ jsonic_node_t* jsonic_array_iter(char* json_str, jsonic_node_t* current, jsonic_
 Useable for iterating arrays. Starts reading from given `node` in `current`, so `index` parameter must start from `0`, it will start reading from given `node`.
 
 #### jsonic_array_iter_free()
+
 ```c
 jsonic_node_t* jsonic_array_iter_free(char* json_str, jsonic_node_t* current, jsonic_node_t* node, int index);
 ```
@@ -250,7 +288,9 @@ jsonic_node_t* jsonic_array_iter_free(char* json_str, jsonic_node_t* current, js
 Same as `jsonic_array_iter()` but frees given jsonic object (`node`).
 
 ##### Iterating Arrays
+
 You can use `jsonic_array_iter()` or `jsonic_array_iter_free()`.
+
 ```c
 jsonic_node_t* power = NULL;
 for (;;) {
@@ -262,6 +302,7 @@ for (;;) {
 **Notice:** Using `jsonic_array_iter()` instead of `jsonic_array_iter_free()` would be non-memory safe for most of times.
 
 #### jsonic_object_iter()
+
 ```c
 jsonic_node_t* jsonic_object_iter(char* json_str, jsonic_node_t* current, jsonic_node_t* from, char* key);
 ```
@@ -271,6 +312,7 @@ Useable for getting a key's value with more performance. It starts reading from 
 **Notice:** You must be sure your key is located after given `node` in JSON.
 
 #### jsonic_object_iter_free()
+
 ```c
 jsonic_node_t* jsonic_object_iter_free(char* json_str, jsonic_node_t* current, jsonic_node_t* from, char* key);
 ```
@@ -278,6 +320,7 @@ jsonic_node_t* jsonic_object_iter_free(char* json_str, jsonic_node_t* current, j
 Same as `jsonic_object_iter()` but frees given jsonic object (`from`).
 
 #### jsonic_object_iter_kv()
+
 ```c
 jsonic_node_t* kv = jsonic_object_iter_kv(json_string, current, from);
 ```
@@ -285,6 +328,7 @@ jsonic_node_t* kv = jsonic_object_iter_kv(json_string, current, from);
 Useable for object iteration as `key: value` pairs in `current` starting from `from`.
 
 #### jsonic_object_iter_kv_free()
+
 ```c
 jsonic_node_t* kv = jsonic_object_iter_kv_free(json_string, current, from);
 ```
@@ -292,13 +336,17 @@ jsonic_node_t* kv = jsonic_object_iter_kv_free(json_string, current, from);
 Same as `jsonic_object_iter_kv()` but frees given jsonic object (`from`).
 
 ##### Iterating Objects with a Key
+
 You can use `jsonic_object_iter()` or `jsonic_object_iter_free()`.
+
 ```c
 jsonic_node_t* node = jsonic_object_iter(json_string, something, previousNode, "someKey");
 ```
 
 ##### Iterating Objects as `Key: Value` Pairs
+
 You can use `jsonic_object_iter_kv()` or `jsonic_object_iter_kv_free()`.
+
 ```c
 jsonic_node_t* key = NULL;
 for (;;) {
@@ -312,21 +360,28 @@ for (;;) {
 ```
 
 ## Compile and Run Examples
+
 You can compile and run examples in `examples/` directory:
+
 ```bash
 cd examples/heroes
 make
 ```
+
 and run on Windows:
+
 ```bash
 heroes.exe
 ```
+
 on Linux:
+
 ```bash
 ./heroes.exe
 ```
 
 ## Example
+
 An example for reading JSON data
 
 ```c
@@ -371,6 +426,7 @@ free(json_string);
 ```
 
 Example JSON (heroes.json):
+
 ```json
 {
     "squadName": "Super hero squad",
@@ -416,13 +472,17 @@ Example JSON (heroes.json):
 ```
 
 ## JSON Type Checking
+
 You must check JSON node for `jsonic_object_get()` or `jsonic_array_get()` from it. Otherwise you will get some absurd data. (e.g. Trying get a key's value from an array.)
 
 ## Syntax Checking
+
 This library does not check JSON syntax, so you may get `SIGSEGV` or maybe infinite loops for **corrupt JSONs**. Likewise in some cases of corrupt JSONs, it would work as properly.
 
 ## Performance
+
 There are some example JSONs and reading examples in `examples/` folder for profiling the performance.
 
 ## License
+
 MIT
