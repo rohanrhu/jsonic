@@ -64,8 +64,8 @@ int main() {
     
     gettimeofday(&t1, NULL);
     long int usecs = (t1.tv_sec * 1000000 + t1.tv_usec) - (t0.tv_sec * 1000000 + t0.tv_usec);
-    printf("\033[1;32m%ld\033[0mus elapsed.\n", usecs);
-    printf("\033[1;32m%.2f\033[0ms elapsed.\n", usecs/1000000.0);
+    printf("%ldus elapsed.\n", usecs);
+    printf("%.2fms elapsed.\n", usecs/1000000.0);
     
     return 0;
 }

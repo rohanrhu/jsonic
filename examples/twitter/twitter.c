@@ -29,8 +29,6 @@ int main() {
     jsonic_node_t* user;
     jsonic_node_t* name;
     jsonic_node_t* text;
-    
-    printf("Statuses Total: %d\n", statuses_length);
 
     jsonic_node_t* status = NULL;
     for (;;) {
@@ -59,6 +57,8 @@ int main() {
     jsonic_free(&statuses);
     jsonic_free(&root);
     free(json_string);
+
+    printf("Statuses Total: %d\n\n", statuses_length);
     
     gettimeofday(&t1, NULL);
     long int usecs = (t1.tv_sec * 1000000 + t1.tv_usec) - (t0.tv_sec * 1000000 + t0.tv_usec);
