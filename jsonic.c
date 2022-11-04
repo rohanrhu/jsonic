@@ -60,16 +60,90 @@ extern void jsonic_free(jsonic_node_t** node) {
 }
 
 extern int jsonic_array_length(char* json_str, jsonic_node_t* array) {
-    int length;
-    jsonic_node_t* node = NULL;
+    int length = 0;
 
-    for (length=0;;) {
-        node = jsonic_get(json_str, array, NULL, 0, jsonic_from_node_free(node), NULL, 0, 0);
-        if ((node == NULL) || (node->type == JSONIC_NONE)) break;
+    int ind = array->ind;
+    int level = 0;
+    int is_esc = 0;
+    char curr = 0;
+    char c;
+
+    PRELOOP:
+
+    c = json_str[ind];
+
+    if ((c == ' ') && (c == '\r') && (c == '\t') && (c == '\n')) {
+        ind++;
+        goto PRELOOP;
+    } else if (c == ']') {
+        return length;
+    } else {
         length++;
+        goto LOOP;
     }
 
-    return length;
+    goto PRELOOP;
+
+    LOOP:
+
+    c = json_str[ind];
+
+    if (c == '\0') {
+        return length;
+    }
+
+    if (level == 0) {
+        if (c == ']') {
+            return length;
+        } else if (c == ',') {
+            length++;
+            ind++;
+            goto LOOP;
+        }
+    }
+
+    if (curr == '"') {
+        if (c == '"') {
+            if (!is_esc) {
+                level--;
+                curr = 0;
+            } else {
+                is_esc = 0;
+            }
+            
+            ind++;
+            goto LOOP;
+        } else if (c == '\\') {
+            if (is_esc) {
+                is_esc = 0;
+            } else {
+                is_esc = 1;
+            }
+        } else if (is_esc) {
+            is_esc = 0;
+        }
+
+        ind++;
+        goto LOOP;
+    }
+
+    switch (c) {
+        case '{':
+        case '[':
+            level++;
+            break;
+        case '}':
+        case ']':
+            level--;
+            break;
+        case '"':
+            level++;
+            curr = '"';
+            break;
+    }
+    
+    ind++;
+    goto LOOP;
 }
 
 extern int jsonic_array_length_from(
@@ -77,31 +151,74 @@ extern int jsonic_array_length_from(
     jsonic_node_t* array,
     jsonic_node_t* from
 ) {
-    int length;
-    jsonic_node_t* node = NULL;
+    int length = 0;
 
-    int wf = 0;
-    int from_i;
-    jsonic_node_t* from_n;
-    for (length=0;;) {
-        if ((node == NULL) || (node->type == JSONIC_NONE)) {
-            from_i = jsonic_from_node(from);
-            from_n = from;
-        } else {
-            from_i = jsonic_from_node(node);
-            from_n = node;
-            wf = 1;
-        }
+    int ind = from->ind;
+    int level = 0;
+    int is_esc = 0;
+    char curr = 0;
+    char c;
 
-        node = jsonic_get(json_str, array, NULL, 0, from_i, from_n, 0, 0);
-        if ((node == NULL) || (node->type == JSONIC_NONE)) break;
-        if (wf) {
-            jsonic_free_addr(from_n);
-        }
-        length++;
+    LOOP:
+
+    c = json_str[ind];
+
+    if (c == '\0') {
+        return length;
     }
 
-    return length;
+    if (level == 0) {
+        if (c == ']') {
+            return length;
+        } else if (c == ',') {
+            length++;
+            ind++;
+            goto LOOP;
+        }
+    }
+
+    if (curr == '"') {
+        if (c == '"') {
+            if (!is_esc) {
+                level--;
+                curr = 0;
+            } else {
+                is_esc = 0;
+            }
+            
+            ind++;
+            goto LOOP;
+        } else if (c == '\\') {
+            if (is_esc) {
+                is_esc = 0;
+            } else {
+                is_esc = 1;
+            }
+        } else if (is_esc) {
+            is_esc = 0;
+        }
+
+        ind++;
+        goto LOOP;
+    }
+
+    switch (c) {
+        case '{':
+        case '[':
+            level++;
+            break;
+        case '}':
+        case ']':
+            level--;
+            break;
+        case '"':
+            level++;
+            curr = '"';
+            break;
+    }
+    
+    ind++;
+    goto LOOP;
 }
 
 extern int jsonic_from_node(jsonic_node_t* node) {
