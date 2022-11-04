@@ -1,0 +1,57 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Example (Heroes)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/examples/heroes/heroes.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/examples/heroes",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "preLaunchTask": "Make"
+        },
+        {
+            "name": "Debug Example (Twitter)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/examples/twitter/twitter.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/examples/twitter",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "preLaunchTask": "Make"
+        },
+        {
+            "name": "Debug Example (KVIter)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/examples/kviteration/kviteration.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/examples/kviteration",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "preLaunchTask": "Make"
+        },
+        {
+            "name": "Debug Example (Cities)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/examples/cities/cities.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/examples/cities",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "preLaunchTask": "Make"
+        }
+    ]
+}
