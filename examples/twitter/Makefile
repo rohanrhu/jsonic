@@ -1,10 +1,15 @@
+#
+# jsonic is a json parser for C
+#
+# https://github.com/rohanrhu/jsonic
+# https://oguzhaneroglu.com/projects/jsonic/
+#
+# Licensed under MIT
+# Copyright (C) 2018, Oğuzhan Eroğlu (https://oguzhaneroglu.com/) <rohanrhu2@gmail.com>
+#
+
 CC = gcc
-CFLAGS = -std=c99 -I../../ -g -O3
-JSONIC_SOURCES = $(filter-out $(shell find ../../ -path "*/examples/*"), $(shell find ../../ -name "*.c"))
-JSONIC_HEADERS = $(filter-out $(shell find ../../ -path "*/examples/*"), $(shell find ../../ -name "*.h"))
-JSONIC_OBJ = $(JSONIC_SOURCES:.c=.o)
-SOURCE = twitter.c
-EXECUTABLE = $(SOURCE:.c=.exe)
+CFLAGS = -std=c99 -I../../ -g # -O3
 
 ifeq ($(OS), Windows_NT)
 	RM = rm -rf
@@ -12,8 +17,8 @@ else
 	RM = rm -rf
 endif
 
-$(EXECUTABLE): $(JSONIC_OBJ)
-	$(CC) -o $@ $(SOURCE) $< $(CFLAGS)
+twitter.exe: twitter.c ../../jsonic.o
+	$(CC) -o $@ $^ $(CFLAGS)
 
 clean:
 	$(RM) $(EXECUTABLE)
