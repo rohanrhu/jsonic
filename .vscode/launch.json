@@ -52,6 +52,19 @@
             "externalConsole": false,
             "MIMode": "lldb",
             "preLaunchTask": "Make"
+        },
+        {
+            "name": "Debug Benchmark (Canada)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/benchmarks/canada/canada.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/benchmarks/canada",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "preLaunchTask": "Make"
         }
     ]
 }

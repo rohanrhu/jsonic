@@ -554,6 +554,24 @@ This library does not check JSON syntax, so you may get `SIGSEGV` or maybe infin
 
 ## Performance
 
+Benchmarks are found in `benchmark/` folder.
+
+Here is `canada.json` benchmark results for Jsonic vs Boost.JSON:
+
+![Jsonic vs Boost.JSON benchmark for canada.json](media/benchmark-canada.png)
+
+| Condition     | Benchmarked on                                           |
+| ------------- | -------------------------------------------------------- |
+| **CPU:**      | Apple M1                                                 |
+| **OS:**       | MacOS Ventura                                            |
+| **Compiler:** | CLang (Apple clang version 14.0.0 (clang-1400.0.29.202)) |
+
+For this benchmark, the winner was changing for each time so I just choosed one of times that Jsonic was winner for adding here :)
+
+Actually I'm very lazy for benchmarks, this benchmark was originated from @RoyBellingan you can find the first results [here](https://gist.github.com/RoyBellingan/54e82fb2933db3982606a31b5d26e1e9) that were just before latest performance enhancements I've just made on Jsonic.
+
+I will make benchmarks for more complicated real-world scenarios, especially for kinda search-purposed scenarios that are what Jsonic is super fast for.
+
 Examples are not benchmarks. The documentation and examples have bad and good usages of Jsonic to tell you how to use it with the correct way that makes Jsonic super fast!
 
 ## Donation

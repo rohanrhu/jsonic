@@ -4,5 +4,13 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"files.associations": {
+			"*.h": "c",
+			"string": "cpp",
+			"filesystem": "cpp",
+			"iosfwd": "cpp",
+			"chrono": "cpp"
+		}
+	}
 }

@@ -31,6 +31,7 @@ all: jsonic.o
 	@make -C examples/cities
 	@make -C examples/twitter
 	@make -C examples/kviteration
+	@make -C benchmarks/canada
 
 jsonic.o: jsonic.c
 	$(CC) -c -o $@ $^ $(CFLAGS)
