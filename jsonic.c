@@ -59,10 +59,11 @@ extern void jsonic_free(jsonic_node_t** node) {
     *node = NULL;
 }
 
-extern int jsonic_array_length(char* json_str, jsonic_node_t* array) {
-    int length = 0;
+extern jsonic_length_t jsonic_array_length(char* json_str, jsonic_node_t* array) {
+    jsonic_length_t result;
+    result.length = 0;
+    result.index = array->ind;
 
-    int ind = array->ind;
     int level = 0;
     int is_esc = 0;
     char curr = 0;
@@ -70,15 +71,16 @@ extern int jsonic_array_length(char* json_str, jsonic_node_t* array) {
 
     PRELOOP:
 
-    c = json_str[ind];
+    c = json_str[result.index];
 
     if ((c == ' ') && (c == '\r') && (c == '\t') && (c == '\n')) {
-        ind++;
+        result.index++;
         goto PRELOOP;
     } else if (c == ']') {
-        return length;
+        array->ending = result.index;
+        return result;
     } else {
-        length++;
+        result.length++;
         goto LOOP;
     }
 
@@ -86,18 +88,20 @@ extern int jsonic_array_length(char* json_str, jsonic_node_t* array) {
 
     LOOP:
 
-    c = json_str[ind];
+    c = json_str[result.index];
 
     if (c == '\0') {
-        return length;
+        array->ending = result.index;
+        return result;
     }
 
     if (level == 0) {
         if (c == ']') {
-            return length;
+            array->ending = result.index;
+            return result;
         } else if (c == ',') {
-            length++;
-            ind++;
+            result.length++;
+            result.index++;
             goto LOOP;
         }
     }
@@ -111,7 +115,7 @@ extern int jsonic_array_length(char* json_str, jsonic_node_t* array) {
                 is_esc = 0;
             }
             
-            ind++;
+            result.index++;
             goto LOOP;
         } else if (c == '\\') {
             if (is_esc) {
@@ -123,7 +127,7 @@ extern int jsonic_array_length(char* json_str, jsonic_node_t* array) {
             is_esc = 0;
         }
 
-        ind++;
+        result.index++;
         goto LOOP;
     }
 
@@ -142,18 +146,19 @@ extern int jsonic_array_length(char* json_str, jsonic_node_t* array) {
             break;
     }
     
-    ind++;
+    result.index++;
     goto LOOP;
 }
 
-extern int jsonic_array_length_from(
+extern jsonic_length_t jsonic_array_length_from(
     char* json_str,
     jsonic_node_t* array,
     jsonic_node_t* from
 ) {
-    int length = 0;
+    jsonic_length_t result;
+    result.length = 0;
+    result.index = from->ind;
 
-    int ind = from->ind;
     int level = 0;
     int is_esc = 0;
     char curr = 0;
@@ -161,18 +166,20 @@ extern int jsonic_array_length_from(
 
     LOOP:
 
-    c = json_str[ind];
+    c = json_str[result.index];
 
     if (c == '\0') {
-        return length;
+        array->ending = result.index;
+        return result;
     }
 
     if (level == 0) {
         if (c == ']') {
-            return length;
+            array->ending = result.index;
+            return result;
         } else if (c == ',') {
-            length++;
-            ind++;
+            result.length++;
+            result.index++;
             goto LOOP;
         }
     }
@@ -186,7 +193,7 @@ extern int jsonic_array_length_from(
                 is_esc = 0;
             }
             
-            ind++;
+            result.index++;
             goto LOOP;
         } else if (c == '\\') {
             if (is_esc) {
@@ -198,7 +205,7 @@ extern int jsonic_array_length_from(
             is_esc = 0;
         }
 
-        ind++;
+        result.index++;
         goto LOOP;
     }
 
@@ -217,11 +224,11 @@ extern int jsonic_array_length_from(
             break;
     }
     
-    ind++;
+    result.index++;
     goto LOOP;
 }
 
-extern int jsonic_from_node(jsonic_node_t* node) {
+extern unsigned int jsonic_from_node(jsonic_node_t* node) {
     if (!node) {
         return 0;
     }
@@ -243,10 +250,14 @@ extern int jsonic_from_node(jsonic_node_t* node) {
     return 0;
 }
 
-extern int jsonic_from_node_free(jsonic_node_t* node) {
+extern unsigned int jsonic_from_node_free(jsonic_node_t* node) {
     int from = jsonic_from_node(node);
     if (node) jsonic_free_addr(node);
     return from;
+}
+
+extern unsigned int jsonic_from_length(jsonic_length_t length) {
+    return length.index;
 }
 
 extern jsonic_node_t* jsonic_get_root(
@@ -300,6 +311,16 @@ extern jsonic_node_t* jsonic_object_iter(
     return jsonic_get(json_str, current, key, 0, jsonic_from_node(from), from, 0, 0);
 }
 
+extern jsonic_node_t* jsonic_object_iter_index(
+    char* json_str,
+    jsonic_node_t* current,
+    jsonic_node_t* from_node_or_null,
+    unsigned int from_index,
+    char* key
+) {
+    return jsonic_get(json_str, current, key, 0, from_index, from_node_or_null, 0, 0);
+}
+
 extern jsonic_node_t* jsonic_object_iter_free(
     char* json_str,
     jsonic_node_t* current,
@@ -333,8 +354,8 @@ extern jsonic_node_t* jsonic_get(
     char* json_str,
     jsonic_node_t* current,
     char* key,
-    int index,
-    int from,
+    unsigned int index,
+    unsigned int from,
     jsonic_node_t* from_object,
     int is_get_root,
     int is_kv_iter
@@ -354,6 +375,7 @@ extern jsonic_node_t* jsonic_get(
     node->pos = ((key == NULL) && !is_kv_iter) 
                 ? ((from_object == NULL) ? 0: from_object->pos)
                 : ((from_object == NULL) ? 0: from_object->pos);
+    node->ending = 0;
 
     int is_key_itered = 0;
 
@@ -362,15 +384,19 @@ extern jsonic_node_t* jsonic_get(
             index++;
         }
     } else {
-        if (from > 0) {
-            if (from_object->type == JSONIC_OBJECT) {
-                node->ind++;
-                node->plevel++;
-            } else if (from_object->type == JSONIC_ARRAY) {
-                node->ind++;
-                node->plevel++;
+        if (from) {
+            if (from_object->ending) {
+                node->ind = from_object->ending+1;
             } else {
-                node->parser_state = JSONIC_EXPECT_KEY_START;
+                if (from_object->type == JSONIC_OBJECT) {
+                    node->ind++;
+                    node->plevel++;
+                } else if (from_object->type == JSONIC_ARRAY) {
+                    node->ind++;
+                    node->plevel++;
+                } else {
+                    node->parser_state = JSONIC_EXPECT_KEY_START;
+                }
             }
         }
     }

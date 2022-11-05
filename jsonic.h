@@ -53,27 +53,36 @@ struct jsonic_node {
     unsigned int arrind;
     unsigned int from;
     unsigned int pos;
-    unsigned int ksync;
-    unsigned int meta;
+    int ksync;
+    int meta;
+    int ending;
+};
+
+typedef struct jsonic_length jsonic_length_t;
+struct jsonic_length {
+    unsigned int length;
+    unsigned int index;
 };
 
 extern char* jsonic_from_file(char* fname);
 extern void jsonic_free_addr(jsonic_node_t* node);
 extern void jsonic_free(jsonic_node_t** node);
-extern jsonic_node_t* jsonic_get(char* json_str, jsonic_node_t* current, char* key, int index, int from, jsonic_node_t* from_node, int is_get_root, int is_kv_iter);
+extern jsonic_node_t* jsonic_get(char* json_str, jsonic_node_t* current, char* key, unsigned int index, unsigned int from, jsonic_node_t* from_node, int is_get_root, int is_kv_iter);
 extern jsonic_node_t* jsonic_get_root(char* json_str);
 extern jsonic_node_t* jsonic_object_get(char* json_str, jsonic_node_t* current, char* key);
 extern jsonic_node_t* jsonic_object_iter(char* json_str, jsonic_node_t* current, jsonic_node_t* from, char* key);
+extern jsonic_node_t* jsonic_object_iter_index(char* json_str, jsonic_node_t* current, jsonic_node_t* from_node_or_null, unsigned int from_index, char* key);
 extern jsonic_node_t* jsonic_object_iter_free(char* json_str, jsonic_node_t* current, jsonic_node_t* from, char* key);
 extern jsonic_node_t* jsonic_object_iter_kv(char* json_str, jsonic_node_t* current, jsonic_node_t* from);
 extern jsonic_node_t* jsonic_object_iter_kv_free(char* json_str, jsonic_node_t* current, jsonic_node_t* from);
 extern jsonic_node_t* jsonic_array_get(char* json_str, jsonic_node_t* current, int index);
-extern jsonic_node_t* jsonic_array_iter(char* json_str, jsonic_node_t* current, jsonic_node_t* node, int index);
+extern jsonic_node_t* jsonic_array_iter(char* json_str, jsonic_node_t* current, jsonic_node_t* from, int index);
 extern jsonic_node_t* jsonic_array_iter_free(char* json_str, jsonic_node_t* current, jsonic_node_t* node, int index);
-extern int jsonic_array_length(char* json_str, jsonic_node_t* array);
-extern int jsonic_array_length_from(char* json_str, jsonic_node_t* array, jsonic_node_t* from);
-extern int jsonic_from_node(jsonic_node_t* node);
-extern int jsonic_from_node_free(jsonic_node_t* node);
+extern jsonic_length_t jsonic_array_length(char* json_str, jsonic_node_t* array);
+extern jsonic_length_t jsonic_array_length_from(char* json_str, jsonic_node_t* array, jsonic_node_t* from);
+extern unsigned int jsonic_from_node(jsonic_node_t* node);
+extern unsigned int jsonic_from_node_free(jsonic_node_t* node);
+extern unsigned int jsonic_from_length(jsonic_length_t length);
 
 int is_bool_char(char c);
 int is_null_char(char c);

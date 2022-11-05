@@ -1,6 +1,16 @@
-# jsonic
+# Jsonic
 
-JSON parser for C.
+[![GitHub issues](https://img.shields.io/github/issues/rohanrhu/jsonic?style=flat-square&color=red)](https://github.com/rohanrhu/jsonic/issues)
+[![GitHub forks](https://img.shields.io/github/forks/rohanrhu/jsonic?style=flat-square)](https://github.com/rohanrhu/jsonic/network)
+[![GitHub stars](https://img.shields.io/github/stars/rohanrhu/jsonic?style=flat-square)](https://github.com/rohanrhu/jsonic/stargazers)
+[![Support me on Patreon](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.vercel.app%2Fapi%3Fusername%3DEvrenselKisilik%26type%3Dpatrons&style=flat-square)](https://patreon.com/EvrenselKisilik)
+[![Donate with BTC](https://shields.io/badge/donate-3KBtYfaAT42uVFd6D2XFRDTAoErLz73vpL-yellow?logo=bitcoin&style=flat-square)](#donation)
+
+High performance tricky JSON reader for C/C++ that can be super fast if you use it correctly.
+
+## Jsonic Philosophy
+
+Jsonic is designed to work with your own iterations for your specific use cases. Please read the documentation and work on examples carefully.
 
 ## Including and Compiling
 
@@ -10,9 +20,11 @@ JSON parser for C.
 #include "jsonic.h"
 ```
 
-### Building
+### Building and Linking
 
-#### GNU Compiler Collection (GCC)
+You can just build and link `jsonic.o` and use `jsonic.h`. Don't forget to use `-O3` flag for compilation.
+
+Using `make` will build Jsonic and examples:
 
 ```bash
 cd /path/to/jsonic
@@ -35,6 +47,7 @@ struct jsonic_node {
     jsonic_node_type_t type;
     unsigned int len;
     unsigned int pos;
+    unsigned int ending;
     ...
 };
 ```
@@ -66,6 +79,25 @@ Null values come as NULL Terminated String in `val` as `"0"` and you can check t
 
 `len` is useable for **string**, **number**, **boolean** and **null** types and does not give length of an **array**.
 You can use [jsonic_array_length()](#jsonic_array_length) or [jsonic_array_length_from()](#jsonic_array_length_from) for getting an array's length.
+
+The length will be found in `result.length` and the position index of the rest of JSON will be found in `result.index`.
+
+If you are going to get something from the rest of JSON just after counting previous object which is an array, you can just use `result.index` as from position.
+There is `jsonic_from_length()` that simply returns `length.index`.
+
+Jsonic will already manage it in a scenario like this:
+
+```c
+jsonic_length_t count = jsonic_array_length(json_string, powers);
+printf("Powers (%d total):\n", jsonic_array_length(json_string, powers).length);
+
+meow = jsonic_object_iter(json_string, member, powers, "meow");
+printf("Meow: %s\n", meow->val); // ! purr
+// ! This following tricky usage is the same of the above one because Jsonic already knows
+// ! that we already iterated chars to get the length of `powers` array, so you don't need to do this.
+meow = jsonic_object_iter_index(json_string, member, powers, jsonic_from_length(count), "meow");
+printf("Meow: %s\n", meow->val); // ! purr
+```
 
 #### Iteration Position
 
@@ -262,13 +294,13 @@ jsonic_free(&root);
 #### jsonic_array_length()
 
 ```c
-int jsonic_array_length(char* json_str, jsonic_node_t* array);
+jsonic_length_t jsonic_array_length(char* json_str, jsonic_node_t* array);
 ```
 
 #### jsonic_array_length_from()
 
 ```c
-int jsonic_array_length_from(char* json_str, jsonic_node_t* array, jsonic_node_t* from);
+jsonic_length_t jsonic_array_length_from(char* json_str, jsonic_node_t* array, jsonic_node_t* from);
 ```
 
 #### jsonic_array_iter()
@@ -359,6 +391,23 @@ for (;;) {
 }
 ```
 
+## Work under the hood?
+
+Sometimes, you may want to be more ticky. Here is `jsonic_get()`:
+
+```c
+extern jsonic_node_t* jsonic_get(
+    char* json_str,
+    jsonic_node_t* current,
+    char* key,
+    unsigned int index,
+    unsigned int from,
+    jsonic_node_t* from_object,
+    int is_get_root,
+    int is_kv_iter
+)
+```
+
 ## Compile and Run Examples
 
 You can compile and run examples in `examples/` directory:
@@ -387,21 +436,39 @@ An example for reading JSON data
 ```c
 char* json_string = jsonic_from_file("heroes.json");
 
+if (json_string == NULL) {
+    printf("JSON file not found.\n");
+    exit(0);
+}
+
 jsonic_node_t* root = jsonic_get_root(json_string);
 
 jsonic_node_t* members = jsonic_object_get(json_string, root, "members");
 jsonic_node_t* member = jsonic_array_get(json_string, members, 1);
 jsonic_node_t* powers = jsonic_object_get(json_string, member, "powers");
 
-// inline usage: non-free'd nodes and non-safe pointers!..
+// ! inline usage: non-free'd nodes and non-safe pointers!..
 // using jsonic_object_get() is poor way because of reading it from start of json each time!
 // use jsonic_object_iter() or jsonic_object_iter_free() instead of jsonic_object_get().
+// ! don't use jsonic_object_get() for sequenced items, use jsonic_object_iter() instead!
 printf("Squad: %s\n", jsonic_object_get(json_string, root, "squadName")->val);
 printf("Active: %s\n", jsonic_object_get(json_string, root, "active")->val);
 printf("Formed: %s\n", jsonic_object_get(json_string, root, "formed")->val);
 printf("Name: %s\n", jsonic_object_get(json_string, member, "name")->val);
 printf("Age: %s\n", jsonic_object_get(json_string, member, "age")->val);
-printf("Powers (%d total):\n", jsonic_array_length(json_string, powers));
+
+jsonic_length_t count = jsonic_array_length(json_string, powers);
+printf("Powers (%d total):\n", count.length);
+
+jsonic_node_t* meow;
+
+// * More performance...
+meow = jsonic_object_iter(json_string, member, powers, "meow");
+printf("Meow: %s\n", meow->val); // ! purr
+// * This following tricky usage is the same of the above one because Jsonic already knows
+// * that we already iterated chars to get the length of `powers` array, so you don't need to do this.
+meow = jsonic_object_iter_index(json_string, member, powers, jsonic_from_length(count), "meow");
+printf("Meow: %s\n", meow->val); // ! purr
 
 jsonic_node_t* power = NULL;
 for (;;) {
@@ -409,11 +476,13 @@ for (;;) {
     if (power->type == JSONIC_NONE) break;
     
     if (power->type == JSONIC_STRING) {
+        jsonic_length_t count = jsonic_array_length_from(json_string, powers, power);
+        
         printf(
             "\t%s (pos: %d, from len: %d)\n",
             power->val,
             power->pos,
-            jsonic_array_length_from(json_string, powers, power)
+            count.length
         );
     }
 }
@@ -429,7 +498,7 @@ Example JSON (heroes.json):
 
 ```json
 {
-    "squadName": "Super hero squad",
+    "squadName": "Super \"hero\" squad",
     "homeTown": "Metro City",
     "formed": 2016,
     "secretBase": "Super tower",
@@ -443,7 +512,8 @@ Example JSON (heroes.json):
             "Radiation resistance",
             "Turning tiny",
             "Radiation blast"
-        ]
+        ],
+        "meow": "purr"
     },
     {
         "name": "Madame Uppercut",
@@ -453,7 +523,8 @@ Example JSON (heroes.json):
             "Million tonne punch",
             "Damage resistance",
             "Superhuman reflexes"
-        ]
+        ],
+        "meow": "purr"
     },
     {
         "name": "Eternal Flame",
@@ -465,10 +536,12 @@ Example JSON (heroes.json):
             "Inferno",
             "Teleportation",
             "Interdimensional travel"
-        ]
+        ],
+        "meow": "purr"
     }
     ]
 }
+
 ```
 
 ## JSON Type Checking
@@ -481,8 +554,21 @@ This library does not check JSON syntax, so you may get `SIGSEGV` or maybe infin
 
 ## Performance
 
-There are some example JSONs and reading examples in `examples/` folder for profiling the performance.
+Examples are not benchmarks. The documentation and examples have bad and good usages of Jsonic to tell you how to use it with the correct way that makes Jsonic super fast!
+
+## Donation
+
+You can donate for supporting me :)
+
+| Currency | Address                                    |
+| -------- | ------------------------------------------ |
+| BTC      | 3KBtYfaAT42uVFd6D2XFRDTAoErLz73vpL         |
+| USDT     | 0xCa422B014A6F588606864ef2d0C40ec2E5d83DFE |
+| USDC     | 0xCa422B014A6F588606864ef2d0C40ec2E5d83DFE |
 
 ## License
 
-MIT
+Copyright (C) 2018, Oğuzhan Eroğlu <rohanrhu2@gmail.com> (https://oguzhaneroglu.com/)
+
+This work is licensed under the terms of the MIT license.  
+For a copy, see <https://opensource.org/licenses/MIT>.

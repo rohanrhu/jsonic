@@ -13,7 +13,8 @@
             "Radiation resistance",
             "Turning tiny",
             "Radiation blast"
-        ]
+        ],
+        "meow": "purr"
     },
     {
         "name": "Madame Uppercut",
@@ -23,7 +24,8 @@
             "Million tonne punch",
             "Damage resistance",
             "Superhuman reflexes"
-        ]
+        ],
+        "meow": "purr"
     },
     {
         "name": "Eternal Flame",
@@ -35,7 +37,8 @@
             "Inferno",
             "Teleportation",
             "Interdimensional travel"
-        ]
+        ],
+        "meow": "purr"
     }
     ]
 }

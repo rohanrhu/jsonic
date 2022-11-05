@@ -8,6 +8,12 @@
  * Copyright (C) 2018, Oğuzhan Eroğlu (https://oguzhaneroglu.com/) <rohanrhu2@gmail.com>
  */
 
+/*
+ * Important:
+ * * These examples are not benchmarks so you must always use iterations functions rather than *_get() variants!
+ * * You must never use inline usages of Jsonic functions!
+ */
+
 #include <sys/time.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -23,7 +29,7 @@ int main() {
     jsonic_node_t* root = jsonic_get_root(json_string);
     
     jsonic_node_t* statuses = jsonic_object_get(json_string, root, "statuses");
-    int statuses_length = jsonic_array_length(json_string, statuses);
+    int statuses_length = jsonic_array_length(json_string, statuses).length;
 
     jsonic_node_t* id;
     jsonic_node_t* user;

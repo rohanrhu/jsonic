@@ -8,6 +8,12 @@
  * Copyright (C) 2018, Oğuzhan Eroğlu (https://oguzhaneroglu.com/) <rohanrhu2@gmail.com>
  */
 
+/*
+ * Important:
+ * * These examples are not benchmarks so you must always use iterations functions rather than *_get() variants!
+ * * You must never use inline usages of Jsonic functions!
+ */
+
 #include <sys/time.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -24,11 +30,19 @@ int main() {
     jsonic_node_t* keys = jsonic_object_get(json_string, root, "keys");
 
     jsonic_node_t* not_exists_key = jsonic_object_get(json_string, root, "not_exists_key");
-    printf("Key Count: %d (keys itered at total)\n", not_exists_key->pos+1);
+    printf("Key Count: %d (keys itered at total)\n", not_exists_key->pos);
 
     jsonic_node_t* arr = jsonic_object_iter(json_string, root, keys, "arr");
     jsonic_node_t* not_exists_item = jsonic_array_iter(json_string, arr, NULL, 100);
-    printf("Item Count: %d (items itered at total)\n\n", not_exists_item->pos+1);
+    printf("Item Count: %d (items itered at total)\n\n", not_exists_item->pos);
+    
+    jsonic_node_t* item;
+
+    item = jsonic_array_get(json_string, arr, 5);
+    printf("Item 5 Pos: %d\n", item->pos);
+    
+    item = jsonic_array_iter(json_string, arr, item, 0);
+    printf("Item 6 Pos: %d\n", item->pos);
 
     printf("Key Value Pairs\n");
 
