@@ -24,6 +24,7 @@ Here is `canada.json` benchmark results for Jsonic vs Boost.JSON:
 | **CPU:**      | Apple M1                                                 |
 | **OS:**       | MacOS Ventura                                            |
 | **Compiler:** | CLang (Apple clang version 14.0.0 (clang-1400.0.29.202)) |
+| **Flags:**    | -O3                                                      |
 
 For this benchmark, the winner was changing for each time so I just choosed one of times that Jsonic was winner for adding here :)
 
