@@ -288,7 +288,14 @@ extern jsonic_node_t* jsonic_array_iter(
     jsonic_node_t* from,
     int index
 ) {
-    return jsonic_get(json_str, current, NULL, index, jsonic_from_node(from), from, 0, 0);
+    unsigned int offset;
+    if (from && from->ending) {
+        offset = from->ending+1;
+    } else {
+        offset = jsonic_from_node(from);
+    }
+    
+    return jsonic_get(json_str, current, NULL, index, offset, from, 0, 0);
 }
 
 extern jsonic_node_t* jsonic_array_iter_free(
@@ -297,7 +304,14 @@ extern jsonic_node_t* jsonic_array_iter_free(
     jsonic_node_t* from,
     int index
 ) {
-    jsonic_node_t* node = jsonic_get(json_str, current, NULL, index, jsonic_from_node(from), from, 0, 0);
+    unsigned int offset;
+    if (from && from->ending) {
+        offset = from->ending+1;
+    } else {
+        offset = jsonic_from_node(from);
+    }
+
+    jsonic_node_t* node = jsonic_get(json_str, current, NULL, index, offset, from, 0, 0);
     jsonic_free_addr(from);
     return node;
 }
