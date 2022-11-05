@@ -11,6 +11,10 @@
 #ifndef __JSONIC_H__
 #define __JSONIC_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum JSONIC_NODE_TYPES {
     JSONIC_NONE,
     JSONIC_OBJECT,
@@ -86,5 +90,9 @@ extern unsigned int jsonic_from_length(jsonic_length_t length);
 
 int is_bool_char(char c);
 int is_null_char(char c);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
