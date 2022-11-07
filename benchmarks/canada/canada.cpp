@@ -26,14 +26,13 @@ int main() {
     // Boost
 
     {
-        boost::json::monotonic_resource mr;
-        std::string path = "/features/0/geometry/coordinates";
-        
         auto start = std::chrono::high_resolution_clock::now();
+        
+        boost::json::monotonic_resource mr;
         
         auto jv = boost::json::parse(buffer, &mr);
 
-        auto& coordinates = jv.at_pointer(path).as_array();
+        auto& coordinates = jv.at_pointer("/features/0/geometry/coordinates").as_array();
         auto  size = coordinates.size();
 
         uint total = 0;
