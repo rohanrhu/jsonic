@@ -16,7 +16,7 @@ Benchmarks are found in `benchmark/` folder.
 
 Here is `twitter.json` benchmark results for Jsonic vs Boost.JSON:
 
-| `statuses[].id`, `statuses[].text`, `statuses[].user`                          | `statuses[].id` only                                                               |
+| `statuses[].id`, `statuses[].text`, `statuses[].user.name`                     | `statuses[].id` only                                                               |
 |--------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
 | ![Jsonic vs Boost.JSON benchmark for canada.json](media/benchmark-twitter.png) | ![Jsonic vs Boost.JSON benchmark for twitter.json](media/benchmark-twitter-a1.png) |
 
