@@ -10,7 +10,7 @@ High performance tricky and dumb JSON reader for C/C++ that can be super fast if
 
 ## Performance
 
-Benchmarks are found in `benchmark/` folder.
+Benchmarks are found in `benchmarks/` folder.
 
 ### Benchmark for `twitter.json`
 
