@@ -23,6 +23,39 @@ int main() {
     std::string buffer;
     buffer.assign((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
 
+    // Jsonic
+
+    {
+        char* json_string = (char*) buffer.c_str();
+
+        auto start = std::chrono::high_resolution_clock::now();
+
+        jsonic_node_t* root = jsonic_get_root(json_string);
+        jsonic_node_t* features = jsonic_object_get(json_string, root, "features");
+        jsonic_node_t* feature = jsonic_array_get(json_string, features, 0);
+        jsonic_node_t* geometry = jsonic_object_get(json_string, feature, "geometry");
+        jsonic_node_t* coordinates = jsonic_object_get(json_string, geometry, "coordinates");
+
+        uint total = 0;
+        jsonic_node_t* coord = NULL;
+        for (;;) {
+            coord = jsonic_array_iter(json_string, coordinates, coord, 0);
+            if (coord->type == JSONIC_NONE)
+                break;
+            
+            total += jsonic_array_length(json_string, coord).length;
+        }
+
+        auto stop = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+
+        std::cout << "Jsonic: " << std::endl;
+        std::cout << "Total: " << total << std::endl;
+        std::cout << "Time: " << duration.count() << " microseconds" << std::endl;
+    }
+
+    std::cout << "----------------------------" << std::endl;
+
     // Boost
 
     {
@@ -44,39 +77,6 @@ int main() {
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
 
         std::cout << "Boost: " << std::endl;
-        std::cout << "Total: " << total << std::endl;
-        std::cout << "Time: " << duration.count() << " microseconds" << std::endl;
-    }
-
-    std::cout << "----------------------------" << std::endl;
-
-    // Jsonic
-
-    {
-        char* json_string = (char*) buffer.c_str();
-
-        auto start = std::chrono::high_resolution_clock::now();
-
-        jsonic_node_t* root = jsonic_get_root(json_string);
-        jsonic_node_t* features = jsonic_object_get(json_string, root, "features");
-        jsonic_node_t* feature = jsonic_array_get(json_string, features, 0);
-        jsonic_node_t* geometry = jsonic_object_get(json_string, feature, "geometry");
-        jsonic_node_t* coordinates = jsonic_object_get(json_string, geometry, "coordinates");
-
-        uint total = 0;
-        jsonic_node_t* coord = NULL;
-        for (;;) {
-            coord = jsonic_array_iter(json_string, coordinates, coord, 0);
-            if (coord->type == JSONIC_NONE)
-                break;
-
-            total += jsonic_array_length(json_string, coord).length;
-        }
-
-        auto stop = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-
-        std::cout << "Jsonic: " << std::endl;
         std::cout << "Total: " << total << std::endl;
         std::cout << "Time: " << duration.count() << " microseconds" << std::endl;
     }

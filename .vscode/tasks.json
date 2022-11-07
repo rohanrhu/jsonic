@@ -18,6 +18,24 @@
             },
             "group": {
                 "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "Make w/ Benchmarks",
+            "type": "shell",
+            "command": "make && make -C benchmarks/twitter && make -C benchmarks/canada",
+            "problemMatcher": ["$gcc"],
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": true
+            },
+            "group": {
+                "kind": "build",
                 "isDefault": true
             }
         }

@@ -6,18 +6,29 @@
 [![Support me on Patreon](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.vercel.app%2Fapi%3Fusername%3DEvrenselKisilik%26type%3Dpatrons&style=flat-square)](https://patreon.com/EvrenselKisilik)
 [![Donate with BTC](https://shields.io/badge/donate-3KBtYfaAT42uVFd6D2XFRDTAoErLz73vpL-yellow?logo=bitcoin&style=flat-square)](#donation)
 
-High performance tricky JSON reader for C/C++ that can be super fast if you use it correctly.
+High performance tricky and dumb JSON reader for C/C++ that can be super fast if you use it correctly.
 
 ## Performance
 
 Benchmarks are found in `benchmark/` folder.
 
+### Benchmark for `twitter.json`
+
+Here is `twitter.json` benchmark results for Jsonic vs Boost.JSON:
+
+| `statuses[].id`, `statuses[].text`, `statuses[].user`                          | `statuses[].id` only                                                               |
+|--------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
+| ![Jsonic vs Boost.JSON benchmark for canada.json](media/benchmark-twitter.png) | ![Jsonic vs Boost.JSON benchmark for twitter.json](media/benchmark-twitter-a1.png) |
+
+### Benchmark for `canada.json`
+
 Here is `canada.json` benchmark results for Jsonic vs Boost.JSON:
 
 ![Jsonic vs Boost.JSON benchmark for canada.json](media/benchmark-canada.png)
 
-<details>
-  <summary>More Details For Benchmarks</summary>
+For this benchmark, the winner was changing for each time so I just choosed one of times that Jsonic was winner for adding here :)
+
+### More Details About Benchmarks
 
 | Condition     | Benchmarked on                                           |
 | ------------- | -------------------------------------------------------- |
@@ -26,15 +37,11 @@ Here is `canada.json` benchmark results for Jsonic vs Boost.JSON:
 | **Compiler:** | CLang (Apple clang version 14.0.0 (clang-1400.0.29.202)) |
 | **Flags:**    | -O3                                                      |
 
-For this benchmark, the winner was changing for each time so I just choosed one of times that Jsonic was winner for adding here :)
+Actually I'm very lazy for benchmarks, `canada.json` benchmark was originated from @RoyBellingan you can find the first results [here](https://gist.github.com/RoyBellingan/54e82fb2933db3982606a31b5d26e1e9) that were just before latest performance enhancements I've just made on Jsonic.
 
-Actually I'm very lazy for benchmarks, this benchmark was originated from @RoyBellingan you can find the first results [here](https://gist.github.com/RoyBellingan/54e82fb2933db3982606a31b5d26e1e9) that were just before latest performance enhancements I've just made on Jsonic.
-
-I will make benchmarks for more complicated real-world scenarios, especially for kinda search-purposed scenarios that are what Jsonic is super fast for.
+`twitter.json` benchmark is a simple example for Jsonic's dumb philosophy. I will make benchmarks for more complicated real-world scenarios, especially for kinda search-purposed scenarios that are what Jsonic is super fast for.
 
 Examples are not benchmarks. The documentation and examples have bad and good usages of Jsonic to tell you how to use it with the correct way that makes Jsonic super fast!
-
-</details>
 
 ## Jsonic Philosophy
 

@@ -12,7 +12,7 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb",
-            "preLaunchTask": "Make"
+            "preLaunchTask": "Make w/ Benchmarks"
         },
         {
             "name": "Debug Example (Twitter)",
@@ -25,7 +25,7 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb",
-            "preLaunchTask": "Make"
+            "preLaunchTask": "Make w/ Benchmarks"
         },
         {
             "name": "Debug Example (KVIter)",
@@ -38,7 +38,7 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb",
-            "preLaunchTask": "Make"
+            "preLaunchTask": "Make w/ Benchmarks"
         },
         {
             "name": "Debug Example (Cities)",
@@ -51,7 +51,7 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb",
-            "preLaunchTask": "Make"
+            "preLaunchTask": "Make w/ Benchmarks"
         },
         {
             "name": "Debug Benchmark (Canada)",
@@ -64,7 +64,20 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb",
-            "preLaunchTask": "Make"
+            "preLaunchTask": "Make w/ Benchmarks"
+        },
+        {
+            "name": "Debug Benchmark (Twitter)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/benchmarks/twitter/twitter.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/benchmarks/twitter",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "preLaunchTask": "Make w/ Benchmarks"
         }
     ]
 }
