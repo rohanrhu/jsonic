@@ -9,7 +9,7 @@
 #
 
 CC = g++
-CFLAGS = -std=c++17 -I../../ -I/opt/homebrew/include -L/opt/homebrew/Cellar/boost/1.80.0/lib -lboost_json -Wno-writable-strings -g -O3 -fdiagnostics-absolute-paths
+CFLAGS = -std=c++17 -I../../ -I/opt/homebrew/include -L/opt/homebrew/Cellar/boost/1.80.0/lib -lboost_json -Wno-writable-strings -g -O3
 
 ifeq ($(OS), Windows_NT)
 	RM = rm -rf

@@ -9,7 +9,7 @@
 #
 
 CC = gcc
-CFLAGS = -std=c99 -I../../ -g -O3 -fdiagnostics-absolute-paths
+CFLAGS = -std=c99 -I../../ -g -O3
 
 ifeq ($(OS), Windows_NT)
 	RM = rm -rf

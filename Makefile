@@ -9,7 +9,7 @@
 #
 
 CC = gcc
-CFLAGS = -std=c99 -I. -g -O3 -fdiagnostics-absolute-paths
+CFLAGS = -std=c99 -I. -g -O3
 SOURCES = $(filter-out $(shell find . -path "*/examples/*"), $(shell find . -name "*.c"))
 HEADERS = $(filter-out $(shell find . -path "*/examples/*"), $(shell find . -name "*.h"))
 OBJ = jsonic.o
